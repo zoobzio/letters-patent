@@ -1,6 +1,6 @@
-# @crestable/nuxt
+# @letters-patent/nuxt
 
-Nuxt module for crestable with SSR. It provides an `$auth` service resolved
+Nuxt module for letters-patent with SSR. It provides an `$auth` service resolved
 on the server and hydrated on the client, the `useAuth()` and `useUser()`
 composables, and the `defineAuthHandlers` server helper — all typed by the
 app's own contract.
@@ -11,9 +11,9 @@ Declare your contract once and add the module:
 
 ```ts
 // shared/contract.ts
-import { defineCrestableConfig } from "crestable/config";
+import { defineLettersPatentConfig } from "letters-patent/config";
 
-export const contract = defineCrestableConfig({
+export const contract = defineLettersPatentConfig({
   scopes: ["docs:read", "docs:write"],
   roles: ["admin", "editor"],
   meta: { plan: ["free", "pro"] },
@@ -23,18 +23,18 @@ export const contract = defineCrestableConfig({
 import { contract } from "./shared/contract";
 
 export default defineNuxtConfig({
-  modules: ["@crestable/nuxt"],
-  crestable: { contract },
+  modules: ["@letters-patent/nuxt"],
+  lettersPatent: { contract },
 });
 ```
 
-Write your provider (a set of callbacks over crestable's own domain objects
+Write your provider (a set of callbacks over letters-patent's own domain objects
 — the h3 event is its own domain, closed over per request), then hand it to
 `defineAuthHandlers` in one server route file:
 
 ```ts
 // server/api/auth/[action].ts
-import { defineSchema } from "crestable";
+import { defineSchema } from "letters-patent";
 import { contract } from "../../../shared/contract";
 import { createMyProvider } from "../../providers/auth";
 
@@ -98,7 +98,7 @@ typed by the contract, so an undeclared scope or role fails to compile.
 ## How it works
 
 - At build time the module proves the configured contract, writes it and the
-  route prefix to the `#build/crestable.mjs` template, and derives the
+  route prefix to the `#build/letters-patent.mjs` template, and derives the
   `AppContract` literal type — so both sides of the wire share one
   vocabulary and the app surface is fully typed.
 - The runtime plugin derives the schema from the build contract, builds the

@@ -2,18 +2,18 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "zoobzio/crestable" }
+    { "repo": "zoobzio/letters-patent" }
   ],
   "commit": false,
   "access": "public",
   "baseBranch": "main",
   "fixed": [
     [
-      "crestable",
-      "@crestable/core",
-      "@crestable/kit",
-      "@crestable/schema",
-      "@crestable/nuxt"
+      "letters-patent",
+      "@letters-patent/core",
+      "@letters-patent/kit",
+      "@letters-patent/schema",
+      "@letters-patent/nuxt"
     ]
   ],
   "linked": [],

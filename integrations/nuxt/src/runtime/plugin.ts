@@ -1,9 +1,9 @@
-import type { AppContract } from "#build/types/crestable.d.ts";
+import type { AppContract } from "#build/types/letters-patent.d.ts";
 
-import { defineCrest, defineSchema } from "crestable";
+import { defineCrest, defineSchema } from "letters-patent";
 
 import { defineNuxtPlugin } from "#app";
-import { contract, prefix } from "#build/crestable.mjs";
+import { contract, prefix } from "#build/letters-patent.mjs";
 
 import { accessAuthState } from "./store";
 import { transport } from "./transport";
@@ -18,7 +18,7 @@ import { transport } from "./transport";
  * hydrated, so it does not resolve again — no refetch, no auth flash.
  */
 export default defineNuxtPlugin({
-  name: "crestable",
+  name: "letters-patent",
   setup: async () => {
     const schema = defineSchema(contract);
     const state = accessAuthState();

@@ -1,9 +1,9 @@
 {
-  "name": "@crestable/core",
+  "name": "@letters-patent/core",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crestable.git",
+    "url": "git+https://github.com/zoobzio/letters-patent.git",
     "directory": "packages/core"
   },
   "type": "module",
@@ -26,7 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@crestable/kit": "workspace:*",
-    "@crestable/schema": "workspace:*"
+    "@letters-patent/kit": "workspace:*",
+    "@letters-patent/schema": "workspace:*"
   }
 }

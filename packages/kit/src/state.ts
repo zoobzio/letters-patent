@@ -1,4 +1,4 @@
-import type { Contract, Schema } from "@crestable/schema";
+import type { Contract, Schema } from "@letters-patent/schema";
 import type { Node, Path, State } from "./types";
 
 import { object } from "objectively";

@@ -1,8 +1,8 @@
 import type { Crest, Events } from "./types";
-import type { Contract, Schema } from "@crestable/schema";
-import type { Provider, State } from "@crestable/kit";
+import type { Contract, Schema } from "@letters-patent/schema";
+import type { Provider, State } from "@letters-patent/kit";
 
-import { defineState } from "@crestable/kit";
+import { defineState } from "@letters-patent/kit";
 
 /**
  * Builds the runtime {@link Crest} service over a schema and a provider.
@@ -12,7 +12,7 @@ import { defineState } from "@crestable/kit";
  * anywhere — is proven against the contract before it commits, and every
  * committed write emits `change`. The lifecycle methods invoke the matching
  * provider callback with the guarded state and the schema; the provider
- * assigns what it establishes, and crestable reads the outcome back off the
+ * assigns what it establishes, and letters-patent reads the outcome back off the
  * state.
  *
  * @param schema - The validation bundle derived from the app's contract.

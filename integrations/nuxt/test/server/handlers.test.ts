@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Meta, User } from "crestable";
-import type { Provider } from "crestable/kit";
+import type { Meta, User } from "letters-patent";
+import type { Provider } from "letters-patent/kit";
 import type { H3Event } from "h3";
-import { SchemaError, defineSchema } from "crestable";
+import { SchemaError, defineSchema } from "letters-patent";
 
 // The handler only uses these three h3 helpers; stub them so the dispatcher
 // can be driven with a plain fake event. `defineEventHandler` becomes

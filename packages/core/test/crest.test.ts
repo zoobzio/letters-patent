@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Meta, User } from "@crestable/schema";
-import { SchemaError, defineSchema } from "@crestable/schema";
-import type { Provider, State } from "@crestable/kit";
+import type { Meta, User } from "@letters-patent/schema";
+import { SchemaError, defineSchema } from "@letters-patent/schema";
+import type { Provider, State } from "@letters-patent/kit";
 import { defineCrest } from "../src/index";
 
 const schema = defineSchema({
@@ -35,45 +35,45 @@ function fakeProvider(overrides: Partial<Provider<C>> = {}): Provider<C> {
 describe("state", () => {
   it("mutates a caller-owned container in place", async () => {
     const target: State<C> = { current: null };
-    const crestable = defineCrest(schema, fakeProvider(), target);
+    const crest = defineCrest(schema, fakeProvider(), target);
 
-    await crestable.resolve();
+    await crest.resolve();
     // The owner of the object sees the change without going through the
     // service — this is what lets Nuxt back the container with useState.
     expect(target.current).toEqual(ada());
 
-    await crestable.logout();
+    await crest.logout();
     expect(target.current).toBeNull();
   });
 
   it("seeds the current user from the passed-in container", () => {
     const target: State<C> = { current: ada() };
-    const crestable = defineCrest(schema, fakeProvider(), target);
+    const crest = defineCrest(schema, fakeProvider(), target);
 
-    expect(crestable.current).toEqual(ada());
-    expect(crestable.authenticated).toBe(true);
+    expect(crest.current).toEqual(ada());
+    expect(crest.authenticated).toBe(true);
   });
 });
 
 describe("resolve", () => {
   it("establishes state through the provider and emits change", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
-    await expect(crestable.resolve()).resolves.toEqual(ada());
+    await expect(crest.resolve()).resolves.toEqual(ada());
     expect(provider.resolve).toHaveBeenCalledOnce();
-    expect(crestable.current).toEqual(ada());
-    expect(crestable.authenticated).toBe(true);
+    expect(crest.current).toEqual(ada());
+    expect(crest.authenticated).toBe(true);
     expect(onChange).toHaveBeenCalledWith(ada());
   });
 
   it("hands the provider the guarded state and the schema", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
 
-    await crestable.resolve();
+    await crest.resolve();
     expect(provider.resolve).toHaveBeenCalledWith(
       expect.objectContaining({ current: ada() }),
       schema,
@@ -82,15 +82,15 @@ describe("resolve", () => {
 
   it("clears state when the provider resolves no user", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
 
     vi.mocked(provider.resolve).mockImplementationOnce(async (state) => {
       state.current = null;
     });
-    await expect(crestable.resolve()).resolves.toBeNull();
-    expect(crestable.current).toBeNull();
-    expect(crestable.authenticated).toBe(false);
+    await expect(crest.resolve()).resolves.toBeNull();
+    expect(crest.current).toBeNull();
+    expect(crest.authenticated).toBe(false);
   });
 
   it("rejects a provider write that violates the contract", async () => {
@@ -99,51 +99,51 @@ describe("resolve", () => {
         state.current = { id: "" } as unknown as User<Meta<C>>;
       }),
     });
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
 
-    await expect(crestable.resolve()).rejects.toThrow(SchemaError);
-    expect(crestable.current).toBeNull();
+    await expect(crest.resolve()).rejects.toThrow(SchemaError);
+    expect(crest.current).toBeNull();
   });
 });
 
 describe("login", () => {
   it("resolves to the user the provider establishes", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
 
-    await expect(crestable.login()).resolves.toEqual(ada());
+    await expect(crest.login()).resolves.toEqual(ada());
     expect(provider.login).toHaveBeenCalledOnce();
-    expect(crestable.current).toEqual(ada());
+    expect(crest.current).toEqual(ada());
   });
 
   it("emits login with the established user", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
+    const crest = defineCrest(schema, fakeProvider());
     const onLogin = vi.fn();
-    crestable.on("login", onLogin);
+    crest.on("login", onLogin);
 
-    await crestable.login();
+    await crest.login();
     expect(onLogin).toHaveBeenCalledExactlyOnceWith(ada());
   });
 
   it("does not emit login for an out-of-band flow", async () => {
     const provider = fakeProvider({ login: vi.fn(async () => {}) });
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
     const onLogin = vi.fn();
-    crestable.on("login", onLogin);
+    crest.on("login", onLogin);
 
-    await crestable.login();
+    await crest.login();
     expect(onLogin).not.toHaveBeenCalled();
   });
 
   it("leaves state untouched when the flow continues out-of-band", async () => {
     const provider = fakeProvider({ login: vi.fn(async () => {}) });
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
-    await expect(crestable.login()).resolves.toEqual(ada());
-    expect(crestable.current).toEqual(ada());
+    await expect(crest.login()).resolves.toEqual(ada());
+    expect(crest.current).toEqual(ada());
     expect(onChange).not.toHaveBeenCalled();
   });
 });
@@ -151,14 +151,14 @@ describe("login", () => {
 describe("logout", () => {
   it("tears down via the provider and clears state", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
-    await crestable.logout();
+    await crest.logout();
     expect(provider.logout).toHaveBeenCalledOnce();
-    expect(crestable.current).toBeNull();
+    expect(crest.current).toBeNull();
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
@@ -168,33 +168,33 @@ describe("logout", () => {
         state.current = null;
       }),
     });
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
-    await crestable.logout();
-    expect(crestable.current).toBeNull();
+    await crest.logout();
+    expect(crest.current).toBeNull();
     expect(onChange).toHaveBeenCalledExactlyOnceWith(null);
   });
 
   it("emits logout with the user that left", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
     const onLogout = vi.fn();
-    crestable.on("logout", onLogout);
+    crest.on("logout", onLogout);
 
-    await crestable.logout();
+    await crest.logout();
     expect(onLogout).toHaveBeenCalledExactlyOnceWith(ada());
   });
 
   it("skips the provider when already unauthenticated", async () => {
     const provider = fakeProvider();
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
     const onLogout = vi.fn();
-    crestable.on("logout", onLogout);
+    crest.on("logout", onLogout);
 
-    await crestable.logout();
+    await crest.logout();
     expect(provider.logout).not.toHaveBeenCalled();
     expect(onLogout).not.toHaveBeenCalled();
   });
@@ -207,10 +207,10 @@ describe("refresh", () => {
         state.current = { ...ada(), expires: 2000 };
       }),
     });
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
 
-    await expect(crestable.refresh()).resolves.toEqual({
+    await expect(crest.refresh()).resolves.toEqual({
       ...ada(),
       expires: 2000,
     });
@@ -223,17 +223,17 @@ describe("refresh", () => {
         state.current = null;
       }),
     });
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
 
-    await expect(crestable.refresh()).resolves.toBeNull();
-    expect(crestable.current).toBeNull();
+    await expect(crest.refresh()).resolves.toBeNull();
+    expect(crest.current).toBeNull();
   });
 
   it("is a no-op without a provider refresh or a current user", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
-    await expect(crestable.refresh()).resolves.toEqual(ada());
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
+    await expect(crest.refresh()).resolves.toEqual(ada());
 
     const refresh = vi.fn(async () => {});
     const anonymous = defineCrest(schema, fakeProvider({ refresh }));
@@ -244,46 +244,46 @@ describe("refresh", () => {
 
 describe("deep mutation", () => {
   it("tracks valid deep writes and emits change", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
-    crestable.current!.meta.name = "Grace";
-    expect(crestable.current?.meta.name).toBe("Grace");
+    crest.current!.meta.name = "Grace";
+    expect(crest.current?.meta.name).toBe("Grace");
     expect(onChange).toHaveBeenCalledOnce();
   });
 
   it("rejects invalid deep writes without emitting", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
     const onChange = vi.fn();
-    crestable.on("change", onChange);
+    crest.on("change", onChange);
 
     expect(() => {
-      crestable.current!.scopes.push("docs:delete" as never);
+      crest.current!.scopes.push("docs:delete" as never);
     }).toThrow(SchemaError);
-    expect(crestable.current?.scopes).toEqual(ada().scopes);
+    expect(crest.current?.scopes).toEqual(ada().scopes);
     expect(onChange).not.toHaveBeenCalled();
   });
 });
 
 describe("can", () => {
   it("grants when the user holds every scope", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
 
-    expect(crestable.can("docs:read")).toBe(true);
-    expect(crestable.can("docs:read", "docs:write")).toBe(true);
+    expect(crest.can("docs:read")).toBe(true);
+    expect(crest.can("docs:read", "docs:write")).toBe(true);
   });
 
   it("denies on a missing scope and emits the denial", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
     const onDenied = vi.fn();
-    crestable.on("denied", onDenied);
+    crest.on("denied", onDenied);
 
-    expect(crestable.can("docs:read", "admin")).toBe(false);
+    expect(crest.can("docs:read", "admin")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "scope",
       required: ["docs:read", "admin"],
@@ -292,11 +292,11 @@ describe("can", () => {
   });
 
   it("denies when unauthenticated", () => {
-    const crestable = defineCrest(schema, fakeProvider());
+    const crest = defineCrest(schema, fakeProvider());
     const onDenied = vi.fn();
-    crestable.on("denied", onDenied);
+    crest.on("denied", onDenied);
 
-    expect(crestable.can("docs:read")).toBe(false);
+    expect(crest.can("docs:read")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "scope",
       required: ["docs:read"],
@@ -307,20 +307,20 @@ describe("can", () => {
 
 describe("is", () => {
   it("grants when the user holds any of the roles", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
 
-    expect(crestable.is("editor")).toBe(true);
-    expect(crestable.is("admin", "editor")).toBe(true);
+    expect(crest.is("editor")).toBe(true);
+    expect(crest.is("admin", "editor")).toBe(true);
   });
 
   it("denies when the user holds none and emits the denial", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
     const onDenied = vi.fn();
-    crestable.on("denied", onDenied);
+    crest.on("denied", onDenied);
 
-    expect(crestable.is("admin", "owner")).toBe(false);
+    expect(crest.is("admin", "owner")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "role",
       required: ["admin", "owner"],
@@ -331,23 +331,23 @@ describe("is", () => {
 
 describe("vocabulary", () => {
   it("carries the contract's vocabulary in the check types", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    await crestable.resolve();
+    const crest = defineCrest(schema, fakeProvider());
+    await crest.resolve();
 
     // @ts-expect-error — a scope outside the contract fails to compile
-    expect(crestable.can("docs:delete")).toBe(false);
+    expect(crest.can("docs:delete")).toBe(false);
     // @ts-expect-error — a role outside the contract fails to compile
-    expect(crestable.is("viewer")).toBe(false);
+    expect(crest.is("viewer")).toBe(false);
   });
 });
 
 describe("stale", () => {
   it("reports false without a user or an expiry", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
-    expect(crestable.stale).toBe(false);
+    const crest = defineCrest(schema, fakeProvider());
+    expect(crest.stale).toBe(false);
 
-    await crestable.resolve();
-    expect(crestable.stale).toBe(false);
+    await crest.resolve();
+    expect(crest.stale).toBe(false);
   });
 
   it("reports staleness from expires without acting on it", async () => {
@@ -356,22 +356,22 @@ describe("stale", () => {
         state.current = { ...ada(), expires: Date.now() - 1000 };
       }),
     });
-    const crestable = defineCrest(schema, provider);
-    await crestable.resolve();
+    const crest = defineCrest(schema, provider);
+    await crest.resolve();
 
-    expect(crestable.stale).toBe(true);
-    expect(crestable.authenticated).toBe(true);
+    expect(crest.stale).toBe(true);
+    expect(crest.authenticated).toBe(true);
   });
 });
 
 describe("on", () => {
   it("stops delivering after unsubscribe", async () => {
-    const crestable = defineCrest(schema, fakeProvider());
+    const crest = defineCrest(schema, fakeProvider());
     const onChange = vi.fn();
-    const off = crestable.on("change", onChange);
+    const off = crest.on("change", onChange);
 
     off();
-    await crestable.resolve();
+    await crest.resolve();
     expect(onChange).not.toHaveBeenCalled();
   });
 });

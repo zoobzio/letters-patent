@@ -1,22 +1,22 @@
-# @crestable/kit
+# @letters-patent/kit
 
 The provider-authoring toolkit. This package owns the `Provider<C>`
 interaction contract, the `Bridge` between a vendor's payloads and an app's
 contract, and `defineProvider` — the entry point published integrations
-(`@crestable/auth0`, …) and homegrown providers share.
+(`@letters-patent/auth0`, …) and homegrown providers share.
 
-A provider is a set of callbacks over crestable's own domain objects: each
+A provider is a set of callbacks over letters-patent's own domain objects: each
 receives the shared `State<C>` and the `Schema<C>`, and assigns
-`state.current` to hand crestable what it needs — proving vendor payloads
+`state.current` to hand letters-patent what it needs — proving vendor payloads
 with the schema at its own boundary. Everything else a flow requires —
 configuration, credentials, request context — is the provider's own,
-acquired in its own domain; crestable defines none of it.
+acquired in its own domain; letters-patent defines none of it.
 
 The author writes the implementation in vendor terms and never sees a
 contract; the app closes the contract with its bridge, in one call:
 
 ```ts
-// published: @crestable/auth0 — knows sessions and flows, never a contract
+// published: @letters-patent/auth0 — knows sessions and flows, never a contract
 export const createAuth0Provider = defineProvider<Auth0Options, Auth0Session>(
   (options, bridge) => ({
     login: async (state) => { ... }, // untouched state = out-of-band

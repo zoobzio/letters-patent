@@ -53,12 +53,12 @@ importers:
       '@nuxt/kit':
         specifier: ^4.4.6
         version: 4.5.2(magic-string@0.30.21)(magicast@0.5.4)(rolldown@1.2.3)
-      crestable:
-        specifier: workspace:*
-        version: link:../../packages/crestable
       h3:
         specifier: ^1.15.11
         version: 1.15.11
+      letters-patent:
+        specifier: workspace:*
+        version: link:../../packages/letters-patent
     devDependencies:
       '@nuxt/schema':
         specifier: ^4.4.6
@@ -66,33 +66,33 @@ importers:
 
   packages/core:
     dependencies:
-      '@crestable/kit':
+      '@letters-patent/kit':
         specifier: workspace:*
         version: link:../kit
-      '@crestable/schema':
-        specifier: workspace:*
-        version: link:../schema
-
-  packages/crestable:
-    dependencies:
-      '@crestable/core':
-        specifier: workspace:*
-        version: link:../core
-      '@crestable/kit':
-        specifier: workspace:*
-        version: link:../kit
-      '@crestable/schema':
+      '@letters-patent/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/kit:
     dependencies:
-      '@crestable/schema':
+      '@letters-patent/schema':
         specifier: workspace:*
         version: link:../schema
       objectively:
         specifier: ^0.1.1
         version: 0.1.1
+
+  packages/letters-patent:
+    dependencies:
+      '@letters-patent/core':
+        specifier: workspace:*
+        version: link:../core
+      '@letters-patent/kit':
+        specifier: workspace:*
+        version: link:../kit
+      '@letters-patent/schema':
+        specifier: workspace:*
+        version: link:../schema
 
   packages/schema:
     dependencies:

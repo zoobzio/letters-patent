@@ -216,7 +216,7 @@ export interface Schema<C extends Contract> {
 }
 
 /**
- * The fixed top-level shape every crestable user satisfies. `Meta` is the
+ * The fixed top-level shape every letters-patent user satisfies. `Meta` is the
  * consumer-defined portion, typed per service instance.
  */
 export interface User<Meta> {

@@ -1,7 +1,7 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
 import type { AppAuth } from "../runtime/types";
 
-/** The Nuxt app instance. `$auth` is added by the crestable runtime. */
+/** The Nuxt app instance. `$auth` is added by the letters-patent runtime. */
 export interface NuxtApp {
   $auth: AppAuth;
 }
@@ -21,7 +21,7 @@ export declare function defineNuxtPlugin(plugin: NuxtPluginDef): NuxtPluginDef;
 
 export declare function useNuxtApp(): NuxtApp;
 
-/** Page metadata. The crestable runtime augments this with `auth`. */
+/** Page metadata. The letters-patent runtime augments this with `auth`. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- merge target
 export interface PageMeta {}
 

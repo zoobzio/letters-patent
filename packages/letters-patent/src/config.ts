@@ -1,4 +1,4 @@
-import type { Contract } from "@crestable/schema";
+import type { Contract } from "@letters-patent/schema";
 
 /**
  * Declare the app's contract in one place — a `shared/contract.ts`, a
@@ -11,5 +11,6 @@ import type { Contract } from "@crestable/schema";
  * Validation is not this helper's job: the contract is proven wherever a
  * schema is derived from it (`defineSchema`, the Nuxt module's build step).
  */
-export const defineCrestableConfig = <const C extends Contract>(config: C): C =>
-  config;
+export const defineLettersPatentConfig = <const C extends Contract>(
+  config: C,
+): C => config;

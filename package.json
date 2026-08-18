@@ -1,5 +1,5 @@
 {
-  "name": "@crestable/monorepo",
+  "name": "@letters-patent/monorepo",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@10.27.0",

@@ -1,21 +1,21 @@
-# crestable
+# letters-patent
 
 The umbrella package — the only thing consumers and integrations install.
 
-- **Root** (`crestable`): the consumer surface — `defineSchema`,
+- **Root** (`letters-patent`): the consumer surface — `defineSchema`,
   `defineCrest`, the `Contract`/`User` types, and runtime validation,
-  re-exported from [`@crestable/schema`](../schema) and
-  [`@crestable/core`](../core).
-- **`crestable/kit`**: the provider surface — `defineProvider`,
+  re-exported from [`@letters-patent/schema`](../schema) and
+  [`@letters-patent/core`](../core).
+- **`letters-patent/kit`**: the provider surface — `defineProvider`,
   `defineState`, and the `Provider`/`State`/`Bridge` contracts, re-exported
-  from [`@crestable/kit`](../kit).
-- **`crestable/config`**: the declaration surface — `defineCrestableConfig`,
+  from [`@letters-patent/kit`](../kit).
+- **`letters-patent/config`**: the declaration surface — `defineLettersPatentConfig`,
   an identity helper that pins a contract's literals without `as const`, for
   the one shared file the contract is declared in.
 
 ```ts
-import { defineCrest, defineSchema } from "crestable";
-import { createAuth0Provider } from "@crestable/auth0";
+import { defineCrest, defineSchema } from "letters-patent";
+import { createAuth0Provider } from "@letters-patent/auth0";
 
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
@@ -34,8 +34,8 @@ const provider = createAuth0Provider(
   }),
 );
 
-const crestable = defineCrest(schema, provider);
+const crest = defineCrest(schema, provider);
 
-await crestable.resolve();
-crestable.can("docs:write");
+await crest.resolve();
+crest.can("docs:write");
 ```

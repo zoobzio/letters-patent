@@ -1,4 +1,4 @@
-import type { Contract, Meta, Role, Scope, User } from "@crestable/schema";
+import type { Contract, Meta, Role, Scope, User } from "@letters-patent/schema";
 
 /** Events the service emits. Subscribe with {@link Crest.on}. */
 export interface Events<C extends Contract> {
@@ -37,7 +37,7 @@ export interface Events<C extends Contract> {
 /**
  * The service: holds current user state behind the schema-guarded proxy,
  * answers authorization checks against the contract's vocabulary, and
- * invokes its provider's callbacks with crestable's own domain objects —
+ * invokes its provider's callbacks with letters-patent's own domain objects —
  * the guarded state and the schema. The lifecycle methods take no
  * arguments; everything a flow needs beyond state is the provider's own.
  */

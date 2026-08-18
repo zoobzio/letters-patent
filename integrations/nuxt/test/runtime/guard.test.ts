@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Meta, User } from "crestable";
-import type { Provider } from "crestable/kit";
-import { defineCrest, defineSchema } from "crestable";
+import type { Meta, User } from "letters-patent";
+import type { Provider } from "letters-patent/kit";
+import { defineCrest, defineSchema } from "letters-patent";
 
 import { guard } from "../../src/runtime/guard";
 

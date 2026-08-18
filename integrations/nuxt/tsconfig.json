@@ -11,8 +11,8 @@
       "vue": ["./src/stubs/vue.d.ts"],
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
-      "#build/crestable.mjs": ["./src/stubs/build/crestable.d.mts"],
-      "#build/types/crestable.d.ts": ["./src/stubs/build/types/crestable.d.ts"]
+      "#build/letters-patent.mjs": ["./src/stubs/build/letters-patent.d.mts"],
+      "#build/types/letters-patent.d.ts": ["./src/stubs/build/types/letters-patent.d.ts"]
     }
   },
   "include": ["src", "test"]

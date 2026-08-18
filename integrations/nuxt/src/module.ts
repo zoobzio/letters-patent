@@ -1,7 +1,7 @@
-import type { Contract } from "crestable";
+import type { Contract } from "letters-patent";
 import type { NuxtModule } from "@nuxt/schema";
 
-import { defineSchema } from "crestable";
+import { defineSchema } from "letters-patent";
 
 import {
   addImports,
@@ -52,12 +52,12 @@ const tuple = (values: readonly string[]): string =>
   `readonly [${values.map(literal).join(", ")}]`;
 
 /**
- * Nuxt module for crestable.
+ * Nuxt module for letters-patent.
  *
  * At build time it validates the configured contract by deriving a schema
- * from it, writes the contract and route prefix to the `crestable.mjs`
+ * from it, writes the contract and route prefix to the `letters-patent.mjs`
  * build template, and derives the `AppContract` literal type into the
- * `types/crestable.d.ts` type template — so the runtime service, the
+ * `types/letters-patent.d.ts` type template — so the runtime service, the
  * composables, and the server handlers all speak the app's own vocabulary.
  * It registers the runtime plugin (which builds the `$auth` service and
  * resolves the user during SSR), the named `auth` route middleware,
@@ -68,8 +68,8 @@ const tuple = (values: readonly string[]): string =>
  */
 const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   meta: {
-    name: "crestable",
-    configKey: "crestable",
+    name: "letters-patent",
+    configKey: "lettersPatent",
   },
   setup: (options, _nuxt) => {
     const resolver = createResolver(import.meta.url);
@@ -77,7 +77,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     const contract = options.contract;
     if (!contract) {
       throw new Error(
-        "crestable: no contract configured — set `crestable.contract` in nuxt.config.",
+        "letters-patent: no contract configured — set `lettersPatent.contract` in nuxt.config.",
       );
     }
 
@@ -87,19 +87,19 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     const prefix = (options.prefix ?? DEFAULT_PREFIX).replace(/\/+$/, "");
     if (!prefix.startsWith("/")) {
       throw new Error(
-        `crestable: \`crestable.prefix\` must start with "/" — got "${prefix}".`,
+        `letters-patent: \`lettersPatent.prefix\` must start with "/" — got "${prefix}".`,
       );
     }
 
     const login = options.login ?? DEFAULT_LOGIN;
     if (!login.startsWith("/")) {
       throw new Error(
-        `crestable: \`crestable.login\` must start with "/" — got "${login}".`,
+        `letters-patent: \`lettersPatent.login\` must start with "/" — got "${login}".`,
       );
     }
 
     addTemplate({
-      filename: "crestable.mjs",
+      filename: "letters-patent.mjs",
       write: true,
       getContents: () =>
         [
@@ -110,11 +110,11 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     });
 
     addTemplate({
-      filename: "crestable.d.mts",
+      filename: "letters-patent.d.mts",
       write: true,
       getContents: () =>
         [
-          `import type { AppContract } from "./types/crestable";`,
+          `import type { AppContract } from "./types/letters-patent";`,
           `export declare const contract: AppContract;`,
           `export declare const prefix: string;`,
           `export declare const login: string;`,
@@ -122,7 +122,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     });
 
     addTypeTemplate({
-      filename: "types/crestable.d.ts",
+      filename: "types/letters-patent.d.ts",
       write: true,
       getContents: () => {
         const meta = Object.entries(contract.meta)

@@ -1,10 +1,10 @@
 {
-  "name": "crestable",
+  "name": "letters-patent",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crestable.git",
-    "directory": "packages/crestable"
+    "url": "git+https://github.com/zoobzio/letters-patent.git",
+    "directory": "packages/letters-patent"
   },
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -34,8 +34,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@crestable/core": "workspace:*",
-    "@crestable/kit": "workspace:*",
-    "@crestable/schema": "workspace:*"
+    "@letters-patent/core": "workspace:*",
+    "@letters-patent/kit": "workspace:*",
+    "@letters-patent/schema": "workspace:*"
   }
 }

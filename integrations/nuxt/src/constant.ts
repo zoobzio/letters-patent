@@ -15,4 +15,4 @@ export const DEFAULT_PREFIX = "/api/auth";
 export const DEFAULT_LOGIN = "/login";
 
 /** The `useState` key the auth service's state is held under. */
-export const STATE_KEY = "crestable:user";
+export const STATE_KEY = "letters-patent:user";

@@ -1,9 +1,9 @@
 {
-  "name": "@crestable/nuxt",
+  "name": "@letters-patent/nuxt",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crestable.git",
+    "url": "git+https://github.com/zoobzio/letters-patent.git",
     "directory": "integrations/nuxt"
   },
   "type": "module",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
-    "crestable": "workspace:*",
+    "letters-patent": "workspace:*",
     "h3": "^1.15.11"
   },
   "devDependencies": {

@@ -1,17 +1,17 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { Provider } from "../src/kit";
 import { defineCrest, defineSchema } from "../src/index";
-import { defineCrestableConfig } from "../src/config";
+import { defineLettersPatentConfig } from "../src/config";
 import { defineProvider, defineState } from "../src/kit";
 
-describe("crestable", () => {
+describe("letters-patent", () => {
   it("exposes the consumer surface at the root", () => {
     expect(defineCrest).toBeTypeOf("function");
     expect(defineSchema).toBeTypeOf("function");
   });
 
   it("exposes the declaration helper at ./config", () => {
-    expect(defineCrestableConfig).toBeTypeOf("function");
+    expect(defineLettersPatentConfig).toBeTypeOf("function");
   });
 
   it("declares a contract with its literals pinned", () => {
@@ -22,10 +22,10 @@ describe("crestable", () => {
     } as const;
 
     // Identity at runtime: the contract stays plain, serializable data.
-    expect(defineCrestableConfig(contract)).toBe(contract);
+    expect(defineLettersPatentConfig(contract)).toBe(contract);
 
     // No `as const` needed: the const type parameter pins the literals.
-    const declared = defineCrestableConfig({
+    const declared = defineLettersPatentConfig({
       scopes: ["docs:read"],
       roles: ["editor"],
       meta: { plan: ["free", "pro"] },
@@ -60,12 +60,12 @@ describe("crestable", () => {
       },
     };
 
-    const crestable = defineCrest(schema, provider);
+    const crest = defineCrest(schema, provider);
 
-    await crestable.resolve();
-    expect(crestable.can("docs:read")).toBe(true);
-    expect(crestable.can("docs:write")).toBe(false);
-    expect(crestable.is("editor")).toBe(true);
-    expect(crestable.is("admin")).toBe(false);
+    await crest.resolve();
+    expect(crest.can("docs:read")).toBe(true);
+    expect(crest.can("docs:write")).toBe(false);
+    expect(crest.is("editor")).toBe(true);
+    expect(crest.is("admin")).toBe(false);
   });
 });

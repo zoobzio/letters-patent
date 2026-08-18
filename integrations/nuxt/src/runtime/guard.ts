@@ -1,4 +1,4 @@
-import type { Contract, Crest, Role, Scope } from "crestable";
+import type { Contract, Crest, Role, Scope } from "letters-patent";
 
 /**
  * A page's access requirements, declared in `definePageMeta({ auth: … })`.

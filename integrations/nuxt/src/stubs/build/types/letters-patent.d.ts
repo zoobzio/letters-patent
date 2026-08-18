@@ -1,4 +1,4 @@
-// Typecheck-only stub for the `types/crestable.d.ts` type template the
+// Typecheck-only stub for the `types/letters-patent.d.ts` type template the
 // module derives from the app's contract.
 export type AppContract = {
   scopes: readonly ["docs:read", "docs:write"];

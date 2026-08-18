@@ -1,5 +1,5 @@
-import type { Contract, Schema } from "crestable";
-import type { Provider } from "crestable/kit";
+import type { Contract, Schema } from "letters-patent";
+import type { Provider } from "letters-patent/kit";
 
 import { useRequestFetch } from "#imports";
 

@@ -1,8 +1,8 @@
-import type { Contract, Schema } from "crestable";
-import type { Provider } from "crestable/kit";
+import type { Contract, Schema } from "letters-patent";
+import type { Provider } from "letters-patent/kit";
 import type { EventHandler, H3Event } from "h3";
 
-import { defineState } from "crestable/kit";
+import { defineState } from "letters-patent/kit";
 import { createError, defineEventHandler, getRouterParam } from "h3";
 
 /**
@@ -14,9 +14,9 @@ import { createError, defineEventHandler, getRouterParam } from "h3";
  *
  * The constructor runs once per request with the h3 event: the event is the
  * provider's own domain — cookies, headers, body, everything a flow needs —
- * closed over at construction, never threaded through crestable. Each action
+ * closed over at construction, never threaded through letters-patent. Each action
  * builds a guarded per-request state, invokes the matching callback with
- * crestable's own domain objects, and answers with the session state after
+ * letters-patent's own domain objects, and answers with the session state after
  * the action:
  *
  * - `session` → `resolve` — the current user, or `null`
@@ -62,7 +62,7 @@ export const defineAuthHandlers = <C extends Contract>(
       default:
         throw createError({
           statusCode: 404,
-          statusMessage: `Unknown crestable action "${action ?? ""}"`,
+          statusMessage: `Unknown letters-patent action "${action ?? ""}"`,
         });
     }
   });

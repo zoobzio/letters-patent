@@ -1,10 +1,10 @@
-import type { AppContract } from "#build/types/crestable.d.ts";
+import type { AppContract } from "#build/types/letters-patent.d.ts";
 import type { AuthRequirements } from "./guard";
-import type { Crest } from "crestable";
+import type { Crest } from "letters-patent";
 
 /**
  * The active contract, derived from the build-time template the module
- * writes from `crestable.contract` in nuxt.config.
+ * writes from `lettersPatent.contract` in nuxt.config.
  */
 export type { AppContract };
 

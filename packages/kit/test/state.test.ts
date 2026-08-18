@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Meta, User } from "@crestable/schema";
-import { SchemaError, defineSchema } from "@crestable/schema";
+import type { Meta, User } from "@letters-patent/schema";
+import { SchemaError, defineSchema } from "@letters-patent/schema";
 import { defineState } from "../src/index";
 
 const schema = defineSchema({

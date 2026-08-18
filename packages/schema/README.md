@@ -1,6 +1,6 @@
-# @crestable/schema
+# @letters-patent/schema
 
-The contracts crestable is built on: the `User<Meta>` shape and runtime
+The contracts letters-patent is built on: the `User<Meta>` shape and runtime
 validation derived from a consumer-authored contract. Validation is built on
 rule lists over the guards in
 [`objectively`](https://www.npmjs.com/package/objectively) — everything else
@@ -15,7 +15,7 @@ the vocabulary in its types: declared inline, its literals become the
 `Scope`, `Role`, and `Meta` types by inference.
 
 ```ts
-import { defineSchema } from "@crestable/schema";
+import { defineSchema } from "@letters-patent/schema";
 
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
@@ -72,7 +72,7 @@ to the failing member (`meta.plan: plan is not declared by the contract.`).
 ## Types
 
 - `User<Meta>` — the fixed user shape. (The `Provider` interaction contract
-  lives in [`@crestable/kit`](../kit).)
+  lives in [`@letters-patent/kit`](../kit).)
 - `Contract` / `Field` — the static configuration and one meta field
   declaration.
 - `Scope<C>` / `Role<C>` / `Meta<C>` — the vocabulary types derived from a
