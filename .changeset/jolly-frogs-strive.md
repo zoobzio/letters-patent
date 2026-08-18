@@ -1,9 +1,9 @@
 ---
-"@crestable/nuxt": minor
-"@crestable/core": minor
-"crestable": minor
-"@crestable/kit": minor
-"@crestable/schema": minor
+"@crestable/nuxt": patch
+"@crestable/core": patch
+"crestable": patch
+"@crestable/kit": patch
+"@crestable/schema": patch
 ---
 
-first alpha release
+initial release

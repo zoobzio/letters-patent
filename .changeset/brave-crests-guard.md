@@ -1,5 +1,5 @@
 ---
-"@crestable/nuxt": minor
+"@crestable/nuxt": patch
 ---
 
 Rename the app-facing surface to auth-domain names and add route protection.

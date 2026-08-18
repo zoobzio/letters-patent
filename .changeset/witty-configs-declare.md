@@ -1,5 +1,5 @@
 ---
-"crestable": minor
+"crestable": patch
 ---
 
 Add the `crestable/config` subpath with `defineCrestableConfig`, an identity
