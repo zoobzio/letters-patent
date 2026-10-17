@@ -1,6 +1,6 @@
 # @letters-patent/core
 
-The service runtime. `defineCrest` takes a schema (the validation bundle
+The service runtime. `definePatent` takes a schema (the validation bundle
 derived from a contract by [`@letters-patent/schema`](../schema)) and a provider
 (the callbacks from [`@letters-patent/kit`](../kit)) and returns the service:
 current user state behind the schema-guarded proxy, authorization checks
@@ -15,7 +15,7 @@ undeclared scope or role fails to compile.
 
 ```ts
 import { defineSchema } from "@letters-patent/schema";
-import { defineCrest } from "@letters-patent/core";
+import { definePatent } from "@letters-patent/core";
 
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
@@ -23,12 +23,12 @@ const schema = defineSchema({
   meta: { plan: ["free", "pro"] },
 });
 
-const crest = defineCrest(schema, provider);
+const patent = definePatent(schema, provider);
 
-await crest.resolve();      // provider establishes state from ambient context
-crest.current;              // typed by the contract, or null
-crest.can("docs:write");    // scope check (all required); emits "denied"
-crest.is("admin");          // role check (any of); emits "denied"
-crest.stale;                // expires passed? reported, never acted on
-crest.on("change", (u) => { ... });
+await patent.resolve();      // provider establishes state from ambient context
+patent.current;              // typed by the contract, or null
+patent.can("docs:write");    // scope check (all required); emits "denied"
+patent.is("admin");          // role check (any of); emits "denied"
+patent.stale;                // expires passed? reported, never acted on
+patent.on("change", (u) => { ... });
 ```

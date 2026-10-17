@@ -12,7 +12,9 @@
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
       "#build/letters-patent.mjs": ["./src/stubs/build/letters-patent.d.mts"],
-      "#build/types/letters-patent.d.ts": ["./src/stubs/build/types/letters-patent.d.ts"]
+      "#build/types/letters-patent.d.ts": [
+        "./src/stubs/build/types/letters-patent.d.ts"
+      ]
     }
   },
   "include": ["src", "test"]

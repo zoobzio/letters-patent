@@ -1,12 +1,12 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { Provider } from "../src/kit";
-import { defineCrest, defineSchema } from "../src/index";
+import { definePatent, defineSchema } from "../src/index";
 import { defineLettersPatentConfig } from "../src/config";
 import { defineProvider, defineState } from "../src/kit";
 
 describe("letters-patent", () => {
   it("exposes the consumer surface at the root", () => {
-    expect(defineCrest).toBeTypeOf("function");
+    expect(definePatent).toBeTypeOf("function");
     expect(defineSchema).toBeTypeOf("function");
   });
 
@@ -60,12 +60,12 @@ describe("letters-patent", () => {
       },
     };
 
-    const crest = defineCrest(schema, provider);
+    const patent = definePatent(schema, provider);
 
-    await crest.resolve();
-    expect(crest.can("docs:read")).toBe(true);
-    expect(crest.can("docs:write")).toBe(false);
-    expect(crest.is("editor")).toBe(true);
-    expect(crest.is("admin")).toBe(false);
+    await patent.resolve();
+    expect(patent.can("docs:read")).toBe(true);
+    expect(patent.can("docs:write")).toBe(false);
+    expect(patent.is("editor")).toBe(true);
+    expect(patent.is("admin")).toBe(false);
   });
 });

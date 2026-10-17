@@ -1,6 +1,6 @@
 import type { AppContract } from "#build/types/letters-patent.d.ts";
 
-import { defineCrest, defineSchema } from "letters-patent";
+import { definePatent, defineSchema } from "letters-patent";
 
 import { defineNuxtPlugin } from "#app";
 import { contract, prefix } from "#build/letters-patent.mjs";
@@ -22,7 +22,7 @@ export default defineNuxtPlugin({
   setup: async () => {
     const schema = defineSchema(contract);
     const state = accessAuthState();
-    const auth = defineCrest(
+    const auth = definePatent(
       schema,
       transport<AppContract>(prefix),
       state.value,

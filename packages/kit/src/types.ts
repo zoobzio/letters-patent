@@ -33,7 +33,7 @@ export type Bridge<Payload, C extends Contract> = (
 
 /**
  * The interaction contract between letters-patent and an authentication service.
- * Crest never implements authentication — a provider wraps a particular
+ * letters-patent never implements authentication — a provider wraps a particular
  * auth API (Auth0, a homegrown JWT backend, …) as a set of callbacks over
  * letters-patent's own domain objects. Each callback receives the shared state and
  * the schema — the validation bundle for proving vendor payloads at the

@@ -1,6 +1,6 @@
 import type { Contract, Meta, Role, Scope, User } from "@letters-patent/schema";
 
-/** Events the service emits. Subscribe with {@link Crest.on}. */
+/** Events the service emits. Subscribe with {@link Patent.on}. */
 export interface Events<C extends Contract> {
   /**
    * User state was written: established, replaced, mutated in place, or
@@ -41,7 +41,7 @@ export interface Events<C extends Contract> {
  * the guarded state and the schema. The lifecycle methods take no
  * arguments; everything a flow needs beyond state is the provider's own.
  */
-export interface Crest<C extends Contract> {
+export interface Patent<C extends Contract> {
   /** The current user, or `null` when unauthenticated. */
   readonly current: User<Meta<C>> | null;
 
@@ -49,7 +49,7 @@ export interface Crest<C extends Contract> {
   readonly authenticated: boolean;
 
   /**
-   * Whether the current session's `expires` has passed. Crest only
+   * Whether the current session's `expires` has passed. The patent only
    * reports staleness — reacting to it (via `refresh` or `logout`) is the
    * consumer's call.
    */

@@ -1,11 +1,11 @@
-import type { Crest, Events } from "./types";
+import type { Patent, Events } from "./types";
 import type { Contract, Schema } from "@letters-patent/schema";
 import type { Provider, State } from "@letters-patent/kit";
 
 import { defineState } from "@letters-patent/kit";
 
 /**
- * Builds the runtime {@link Crest} service over a schema and a provider.
+ * Builds the runtime {@link Patent} service over a schema and a provider.
  *
  * The caller-owned container is fronted by the schema-guarded state from
  * `defineState`, so every write — by the provider, or a deep mutation from
@@ -20,13 +20,13 @@ import { defineState } from "@letters-patent/kit";
  * @param target - The underlying container; created when omitted. Mutated
  *   in place, so a caller that owns the object (e.g. a reactive one) sees
  *   every write.
- * @returns A {@link Crest} service bound to the container.
+ * @returns A {@link Patent} service bound to the container.
  */
-export const defineCrest = <C extends Contract>(
+export const definePatent = <C extends Contract>(
   schema: Schema<C>,
   provider: Provider<C>,
   target: State<C> = { current: null },
-): Crest<C> => {
+): Patent<C> => {
   const handlers: {
     [Event in keyof Events<C>]: Set<(payload: Events<C>[Event]) => void>;
   } = {

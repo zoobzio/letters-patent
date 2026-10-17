@@ -1,10 +1,10 @@
-# @crestable/nuxt
+# @letters-patent/nuxt
 
 ## 0.0.1
 
 ### Patch Changes
 
-- [`f5f9d18`](https://github.com/zoobzio/crestable/commit/f5f9d180d8a21b14e70e36d6f05c559510abcde2) Thanks [@zoobzio](https://github.com/zoobzio)! - Rename the app-facing surface to auth-domain names and add route protection.
+- [`f5f9d18`](https://github.com/zoobzio/letters-patent/commit/f5f9d180d8a21b14e70e36d6f05c559510abcde2) Thanks [@zoobzio](https://github.com/zoobzio)! - Rename the app-facing surface to auth-domain names and add route protection.
 
   - `useCrest()` is now `useAuth()`, and the injected service is `$auth`
     (was `$crestable`); a new `useUser()` composable exposes the current
@@ -22,7 +22,7 @@
     parameter; authenticated users that fall short of the requirements get
     a 403.
 
-- [`ed4a1dd`](https://github.com/zoobzio/crestable/commit/ed4a1dd92acd075d9b631b405f3717e372ca8c4e) Thanks [@zoobzio](https://github.com/zoobzio)! - initial release
+- [`ed4a1dd`](https://github.com/zoobzio/letters-patent/commit/ed4a1dd92acd075d9b631b405f3717e372ca8c4e) Thanks [@zoobzio](https://github.com/zoobzio)! - initial release
 
-- Updated dependencies [[`ed4a1dd`](https://github.com/zoobzio/crestable/commit/ed4a1dd92acd075d9b631b405f3717e372ca8c4e), [`f5f9d18`](https://github.com/zoobzio/crestable/commit/f5f9d180d8a21b14e70e36d6f05c559510abcde2)]:
-  - crestable@0.0.1
+- Updated dependencies [[`ed4a1dd`](https://github.com/zoobzio/letters-patent/commit/ed4a1dd92acd075d9b631b405f3717e372ca8c4e), [`f5f9d18`](https://github.com/zoobzio/letters-patent/commit/f5f9d180d8a21b14e70e36d6f05c559510abcde2)]:
+  - letters-patent@0.0.1

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Meta, User } from "letters-patent";
 import type { Provider } from "letters-patent/kit";
-import { defineCrest, defineSchema } from "letters-patent";
+import { definePatent, defineSchema } from "letters-patent";
 
 import { guard } from "../../src/runtime/guard";
 
@@ -29,7 +29,7 @@ const provider: Provider<C> = {
 };
 
 const service = (user: User<Meta<C>> | null) =>
-  defineCrest(schema, provider, { current: user });
+  definePatent(schema, provider, { current: user });
 
 describe("guard", () => {
   it("turns away a visitor with no user", () => {

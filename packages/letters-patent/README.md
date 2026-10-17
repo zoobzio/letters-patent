@@ -3,7 +3,7 @@
 The umbrella package — the only thing consumers and integrations install.
 
 - **Root** (`letters-patent`): the consumer surface — `defineSchema`,
-  `defineCrest`, the `Contract`/`User` types, and runtime validation,
+  `definePatent`, the `Contract`/`User` types, and runtime validation,
   re-exported from [`@letters-patent/schema`](../schema) and
   [`@letters-patent/core`](../core).
 - **`letters-patent/kit`**: the provider surface — `defineProvider`,
@@ -14,7 +14,7 @@ The umbrella package — the only thing consumers and integrations install.
   the one shared file the contract is declared in.
 
 ```ts
-import { defineCrest, defineSchema } from "letters-patent";
+import { definePatent, defineSchema } from "letters-patent";
 import { createAuth0Provider } from "@letters-patent/auth0";
 
 const schema = defineSchema({
@@ -34,8 +34,8 @@ const provider = createAuth0Provider(
   }),
 );
 
-const crest = defineCrest(schema, provider);
+const patent = definePatent(schema, provider);
 
-await crest.resolve();
-crest.can("docs:write");
+await patent.resolve();
+patent.can("docs:write");
 ```

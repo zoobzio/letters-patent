@@ -264,7 +264,7 @@ export interface User<Meta> {
 
   /**
    * Epoch-milliseconds timestamp after which the session is considered
-   * stale. Crest never acts on staleness itself; it only reports it.
+   * stale. letters-patent never acts on staleness itself; it only reports it.
    */
   expires?: number;
 

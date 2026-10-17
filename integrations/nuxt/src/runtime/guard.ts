@@ -1,4 +1,4 @@
-import type { Contract, Crest, Role, Scope } from "letters-patent";
+import type { Contract, Patent, Role, Scope } from "letters-patent";
 
 /**
  * A page's access requirements, declared in `definePageMeta({ auth: … })`.
@@ -24,7 +24,7 @@ export type Verdict = "granted" | "unauthenticated" | "denied";
  * service's `denied` event with the failed requirement.
  */
 export const guard = <C extends Contract>(
-  auth: Crest<C>,
+  auth: Patent<C>,
   requirements?: AuthRequirements<C>,
 ): Verdict => {
   if (!auth.authenticated) {
