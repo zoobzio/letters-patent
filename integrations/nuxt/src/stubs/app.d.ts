@@ -22,7 +22,7 @@ export declare function defineNuxtPlugin(plugin: NuxtPluginDef): NuxtPluginDef;
 export declare function useNuxtApp(): NuxtApp;
 
 /** Page metadata. The letters-patent runtime augments this with `auth`. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- merge target
+// oxlint-disable-next-line typescript/no-empty-object-type -- merge target
 export interface PageMeta {}
 
 /** The slice of a route location the middleware touches. */

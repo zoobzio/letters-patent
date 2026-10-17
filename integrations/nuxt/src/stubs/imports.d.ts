@@ -1,11 +1,7 @@
 // Typecheck-only stub for the Nuxt `#imports` virtual module.
-import type { ComputedRef } from "vue";
+import type { ComputedRef, Ref } from "vue";
 
-interface StateRef<T> {
-  value: T;
-}
-
-export declare function useState<T>(key: string, init: () => T): StateRef<T>;
+export declare function useState<T>(key: string, init: () => T): Ref<T>;
 
 export declare function computed<T>(getter: () => T): ComputedRef<T>;
 

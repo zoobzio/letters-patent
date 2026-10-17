@@ -29,13 +29,13 @@ typecheck: ## Type-check every package
 test: ## Run the test suite
 	pnpm test
 
-lint: ## Lint with eslint
+lint: ## Lint with oxlint
 	pnpm lint
 
-format: ## Format the repo with prettier
+format: ## Format the repo with oxfmt
 	pnpm format
 
-inspect: ## Check formatting without writing (prettier --check)
+inspect: ## Check formatting without writing (oxfmt --check)
 	pnpm inspect
 
 clean: ## Remove build output and coverage (.dist, .coverage)

@@ -150,7 +150,8 @@ export type Rules = { [K in Kind]: Rule[] };
  * or failure with every {@link Issue} found.
  */
 export type Result<V> =
-  { success: true; data: V } | { success: false; issues: Issue[] };
+  | { success: true; data: V }
+  | { success: false; issues: Issue[] };
 
 /**
  * The contract's derived sets — the vocabulary membership rules check

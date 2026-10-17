@@ -1,10 +1,11 @@
-import { defineBuildConfig } from "unbuild";
+import { defineBuildConfig } from "obuild/config";
 
 export default defineBuildConfig({
-  entries: ["src/index", "src/kit", "src/config"],
-  outDir: ".dist",
-  declaration: true,
-  rollup: {
-    emitCJS: false,
-  },
+  entries: [
+    {
+      type: "bundle",
+      input: ["./src/index.ts", "./src/kit.ts", "./src/config.ts"],
+      outDir: ".dist",
+    },
+  ],
 });

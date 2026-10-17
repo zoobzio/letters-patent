@@ -8,10 +8,10 @@
   },
   "type": "module",
   "main": "./.dist/index.mjs",
-  "types": "./.dist/index.d.ts",
+  "types": "./.dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./.dist/index.d.ts",
+      "types": "./.dist/index.d.mts",
       "import": "./.dist/index.mjs"
     }
   },
@@ -19,13 +19,13 @@
     ".dist"
   ],
   "scripts": {
-    "build": "unbuild",
-    "stub": "unbuild --stub",
-    "lint": "eslint .",
+    "build": "obuild",
+    "stub": "obuild --stub",
+    "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "objectively": "^0.1.1"
+    "objectively": "catalog:"
   }
 }

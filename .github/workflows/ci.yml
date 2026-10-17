@@ -15,27 +15,27 @@ permissions:
   contents: read
 
 jobs:
-  # Build every package to its .dist once and share it with the downstream
-  # typecheck and test jobs — .dist output is Node-independent, so there is no
-  # need to rebuild it per matrix entry. .dist is a dotfile dir, so the upload
-  # must opt into hidden files or the artifact comes back empty.
+  # Build every package once and warm the turbo cache. The cache restores from
+  # the newest entry on this or the default branch, so only packages whose
+  # inputs changed since that run are rebuilt. The downstream jobs restore this
+  # run's entry by exact key and get every .dist back from cache without
+  # rebuilding; .dist output is Node-independent, so one entry serves the
+  # whole matrix. Nothing downstream writes back, so test and typecheck results
+  # are never cached and always run fresh.
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm build
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
+      - name: Cache turbo
+        uses: actions/cache@v4
         with:
-          name: dist
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 1
-          path: |
-            packages/*/.dist
-            integrations/*/.dist
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - run: pnpm build
 
   # Lint and format read source only (no type-aware rules, no cross-package
   # resolution), so they run immediately without waiting on the build.
@@ -56,7 +56,8 @@ jobs:
       - run: pnpm inspect
 
   # Downstream packages resolve sibling packages via their .dist type
-  # declarations, so typecheck needs the build artifact.
+  # declarations, so typecheck needs the build output. The cached pnpm build
+  # restores it without rebuilding.
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
@@ -64,10 +65,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - name: Download build output
-        uses: actions/download-artifact@v4
+      - name: Restore turbo cache
+        uses: actions/cache/restore@v4
         with:
-          name: dist
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          fail-on-cache-miss: true
+      - run: pnpm build
       - run: pnpm typecheck
 
   # Only the tests exercise runtime behaviour, so they alone fan out across the
@@ -85,10 +89,13 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           node-version: ${{ matrix.node }}
-      - name: Download build output
-        uses: actions/download-artifact@v4
+      - name: Restore turbo cache
+        uses: actions/cache/restore@v4
         with:
-          name: dist
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          fail-on-cache-miss: true
+      - run: pnpm build
       - run: pnpm test
 
   # A single aggregated coverage pass on the pinned Node version — the matrix
@@ -102,10 +109,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - name: Download build output
-        uses: actions/download-artifact@v4
+      - name: Restore turbo cache
+        uses: actions/cache/restore@v4
         with:
-          name: dist
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          fail-on-cache-miss: true
+      - run: pnpm build
       - run: pnpm coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

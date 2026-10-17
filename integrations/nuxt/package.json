@@ -8,18 +8,18 @@
   },
   "type": "module",
   "main": "./.dist/module.mjs",
-  "types": "./.dist/module.d.ts",
+  "types": "./.dist/module.d.mts",
   "exports": {
     ".": {
-      "types": "./.dist/module.d.ts",
+      "types": "./.dist/module.d.mts",
       "import": "./.dist/module.mjs"
     },
     "./server": {
-      "types": "./.dist/server/handlers.d.ts",
+      "types": "./.dist/server/handlers.d.mts",
       "import": "./.dist/server/handlers.mjs"
     },
     "./constant": {
-      "types": "./.dist/constant.d.ts",
+      "types": "./.dist/constant.d.mts",
       "import": "./.dist/constant.mjs"
     }
   },
@@ -27,18 +27,18 @@
     ".dist"
   ],
   "scripts": {
-    "build": "unbuild",
-    "stub": "unbuild --stub",
-    "lint": "eslint .",
+    "build": "obuild",
+    "stub": "obuild --stub",
+    "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.4.6",
+    "@nuxt/kit": "catalog:",
     "letters-patent": "workspace:*",
-    "h3": "^1.15.11"
+    "h3": "catalog:"
   },
   "devDependencies": {
-    "@nuxt/schema": "^4.4.6"
+    "@nuxt/schema": "catalog:"
   }
 }

@@ -1,5 +1,6 @@
 import type { AppContract } from "#build/types/letters-patent.d.ts";
 import type { State } from "letters-patent/kit";
+import type { Ref } from "vue";
 
 import { useState } from "#imports";
 
@@ -11,5 +12,5 @@ import { STATE_KEY } from "../constant";
  * and Vue tracks the in-place mutations the guarded state makes — the
  * service itself stays reactivity-agnostic.
  */
-export const accessAuthState = () =>
+export const accessAuthState = (): Ref<State<AppContract>> =>
   useState<State<AppContract>>(STATE_KEY, () => ({ current: null }));
