@@ -15,7 +15,7 @@ The umbrella package — the only thing consumers and integrations install.
 
 ```ts
 import { definePatent, defineSchema } from "letters-patent";
-import { createAuth0Provider } from "@letters-patent/auth0";
+import { createGoogleProvider } from "@letters-patent/google";
 
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
@@ -23,15 +23,19 @@ const schema = defineSchema({
   meta: { plan: ["free", "pro"] },
 });
 
-const provider = createAuth0Provider(
+const provider = createGoogleProvider(
   schema,
-  { domain, clientId },
-  (session) => ({
-    id: session.sub,
-    scopes: session.permissions,
-    roles: session.groups,
-    meta: { plan: session.app_metadata.plan },
-  }),
+  { event, clientId, clientSecret, redirectUri, secret },
+  async (claims) => {
+    const account = await db.account.findBySubject(claims.sub);
+    return {
+      id: claims.sub,
+      email: claims.email,
+      scopes: account?.scopes ?? [],
+      roles: account?.roles ?? [],
+      meta: { plan: account?.plan ?? "free" },
+    };
+  },
 );
 
 const patent = definePatent(schema, provider);

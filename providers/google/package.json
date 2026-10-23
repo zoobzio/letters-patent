@@ -1,0 +1,32 @@
+{
+  "name": "@letters-patent/google",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/letters-patent.git",
+    "directory": "providers/google"
+  },
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.mts",
+      "import": "./.dist/index.mjs"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "obuild",
+    "stub": "obuild --stub",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "letters-patent": "workspace:*",
+    "h3": "catalog:"
+  }
+}

@@ -1,7 +1,8 @@
 # letters-patent
 
 A pnpm monorepo. Publishable packages live in [`packages/`](./packages);
-framework bridges live in [`integrations/`](./integrations).
+framework bridges live in [`integrations/`](./integrations); authentication
+providers live in [`providers/`](./providers).
 
 ## Development
 

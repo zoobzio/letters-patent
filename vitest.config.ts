@@ -11,7 +11,7 @@ import { defineConfig } from "vitest/config";
  * The projects list is enumerated rather than globbed because vitest errors
  * on a glob that matches nothing, and the workspace starts empty.
  */
-const projects = ["packages", "integrations"].flatMap((dir) =>
+const projects = ["packages", "integrations", "providers"].flatMap((dir) =>
   existsSync(dir)
     ? readdirSync(dir)
         .map((name) => join(dir, name, "vitest.config.ts"))
@@ -27,7 +27,11 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       reportsDirectory: ".coverage",
-      include: ["packages/*/src/**/*.ts", "integrations/*/src/**/*.ts"],
+      include: [
+        "packages/*/src/**/*.ts",
+        "integrations/*/src/**/*.ts",
+        "providers/*/src/**/*.ts",
+      ],
     },
   },
 });

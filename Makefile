@@ -40,7 +40,7 @@ inspect: ## Check formatting without writing (oxfmt --check)
 
 clean: ## Remove build output and coverage (.dist, .coverage)
 	rm -rf .coverage
-	find packages integrations -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
+	find packages integrations providers -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
 
 check: lint typecheck test ## Run lint/typecheck/test against existing build output
 

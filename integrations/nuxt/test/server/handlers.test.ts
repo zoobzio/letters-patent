@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Meta, User } from "letters-patent";
 import type { Provider } from "letters-patent/kit";
 import type { H3Event } from "h3";
@@ -7,9 +7,18 @@ import { SchemaError, defineSchema } from "letters-patent";
 // The handler only uses these three h3 helpers; stub them so the dispatcher
 // can be driven with a plain fake event. `defineEventHandler` becomes
 // identity, so the returned handler is the raw async function.
+const sendRedirect = vi.fn(
+  async (event: FakeEvent, location: string, code: number) => {
+    event.redirected = { location, code };
+  },
+);
+
 vi.mock("h3", () => ({
   defineEventHandler: (fn: unknown) => fn,
   getRouterParam: (event: FakeEvent, name: string) => event.params[name],
+  getHeader: (event: FakeEvent, name: string) => event.headers[name],
+  sendRedirect: (event: FakeEvent, location: string, code: number) =>
+    sendRedirect(event, location, code),
   createError: (opts: { statusCode: number; statusMessage: string }) =>
     Object.assign(new Error(opts.statusMessage), opts),
 }));
@@ -26,6 +35,8 @@ type C = (typeof schema)["base"];
 
 interface FakeEvent {
   params: Record<string, string>;
+  headers: Record<string, string>;
+  redirected?: { location: string; code: number };
 }
 
 const ada = (): User<Meta<C>> => ({
@@ -59,11 +70,21 @@ function handlers(provider: Provider<C>) {
   return { handle, construct };
 }
 
-function event(action: string): FakeEvent {
-  return { params: { action } };
+function event(
+  action: string,
+  headers: Record<string, string> = { "sec-fetch-mode": "cors" },
+): FakeEvent {
+  return { params: { action }, headers };
 }
 
+const navigating = (action: string): FakeEvent =>
+  event(action, { "sec-fetch-mode": "navigate" });
+
 describe("defineAuthHandlers", () => {
+  beforeEach(() => {
+    sendRedirect.mockClear();
+  });
+
   it("constructs the provider per request with the event", async () => {
     const { handle, construct } = handlers(fakeProvider());
 
@@ -102,6 +123,92 @@ describe("defineAuthHandlers", () => {
     const { handle } = handlers(provider);
 
     await expect(handle(event("login"))).resolves.toBeNull();
+  });
+
+  it("login hands a fetching transport the continuation as data", async () => {
+    const provider = fakeProvider({
+      login: vi.fn(async () => ({
+        location: "https://auth.example/authorize",
+      })),
+    });
+    const { handle } = handlers(provider);
+
+    await expect(handle(event("login"))).resolves.toEqual({
+      location: "https://auth.example/authorize",
+    });
+    expect(sendRedirect).not.toHaveBeenCalled();
+  });
+
+  it("login sends a navigating browser on with a 302", async () => {
+    const provider = fakeProvider({
+      login: vi.fn(async () => ({
+        location: "https://auth.example/authorize",
+      })),
+    });
+    const { handle } = handlers(provider);
+    const request = navigating("login");
+
+    await expect(handle(request)).resolves.toBeUndefined();
+    expect(request.redirected).toEqual({
+      location: "https://auth.example/authorize",
+      code: 302,
+    });
+  });
+
+  it("falls back to the Accept header when the browser does not say", async () => {
+    const provider = fakeProvider({
+      login: vi.fn(async () => ({
+        location: "https://auth.example/authorize",
+      })),
+    });
+    const { handle } = handlers(provider);
+    const request = event("login", {
+      accept: "text/html,application/xhtml+xml",
+    });
+
+    await handle(request);
+    expect(request.redirected?.location).toBe("https://auth.example/authorize");
+
+    const fetching = event("login", { accept: "application/json" });
+    await expect(handle(fetching)).resolves.toEqual({
+      location: "https://auth.example/authorize",
+    });
+  });
+
+  it("callback establishes the session and lands on the provider's path", async () => {
+    const provider = fakeProvider({
+      callback: vi.fn(async (state) => {
+        state.current = ada();
+        return { location: "/docs" };
+      }),
+    });
+    const { handle } = handlers(provider);
+    const request = navigating("callback");
+
+    await expect(handle(request)).resolves.toBeUndefined();
+    expect(provider.callback).toHaveBeenCalledWith(
+      expect.objectContaining({ current: ada() }),
+      schema,
+    );
+    expect(request.redirected).toEqual({ location: "/docs", code: 302 });
+  });
+
+  it("callback answers with the user when the provider names no path", async () => {
+    const provider = fakeProvider({
+      callback: vi.fn(async (state) => {
+        state.current = ada();
+      }),
+    });
+    const { handle } = handlers(provider);
+
+    await expect(handle(navigating("callback"))).resolves.toEqual(ada());
+  });
+
+  it("callback is a 404 for a provider without a return leg", async () => {
+    const { handle } = handlers(fakeProvider());
+    await expect(handle(navigating("callback"))).rejects.toMatchObject({
+      statusCode: 404,
+    });
   });
 
   it("logout tears down the resolved session and answers null", async () => {

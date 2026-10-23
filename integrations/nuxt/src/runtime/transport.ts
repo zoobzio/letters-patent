@@ -1,5 +1,5 @@
 import type { Contract, Schema } from "letters-patent";
-import type { Provider } from "letters-patent/kit";
+import type { Provider, Redirect } from "letters-patent/kit";
 
 import { useRequestFetch } from "#imports";
 
@@ -19,6 +19,16 @@ const call = async (
 };
 
 /**
+ * Whether a wire answer is an out-of-band continuation rather than a user:
+ * the server could not redirect a fetch, so it handed over the location.
+ */
+const continuation = (payload: unknown): payload is Redirect =>
+  typeof payload === "object" &&
+  payload !== null &&
+  "location" in payload &&
+  typeof payload.location === "string";
+
+/**
  * A wire payload proven and narrowed, or `null` for an empty answer.
  */
 const settle = <C extends Contract>(schema: Schema<C>, payload: unknown) =>
@@ -35,6 +45,15 @@ const settle = <C extends Contract>(schema: Schema<C>, payload: unknown) =>
 export const transport = <C extends Contract>(prefix: string): Provider<C> => ({
   login: async (state, schema) => {
     const payload = await call(prefix, "login", { method: "POST" });
+    // A continuation means the flow proceeds at the auth host: the browser
+    // navigates there, and the callback route establishes the session when
+    // it returns. State stays untouched until then.
+    if (continuation(payload)) {
+      if (import.meta.client) {
+        window.location.assign(payload.location);
+      }
+      return;
+    }
     // An empty answer means the flow continues out-of-band; state stays
     // untouched until resolve() runs on return.
     const user = settle(schema, payload);

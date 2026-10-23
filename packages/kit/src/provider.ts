@@ -12,6 +12,11 @@ import type { Bridge, Provider } from "./types";
  * it once, and the schema argument pins `C` — its `base` carries the
  * contract in a plainly inferable slot — so the bridge is contextually
  * typed against the app's own vocabulary with no annotation anywhere.
+ *
+ * The bridge the implementation receives is instrumented: it awaits the
+ * app's bridge (which may reach a database for the user's grants) and
+ * proves the result against the schema, so the author assigns
+ * `state.current = await bridge(payload)` and never parses.
  */
 export const defineProvider = <Options, Payload>(
   impl: (
@@ -24,8 +29,8 @@ export const defineProvider = <Options, Payload>(
     options: Options,
     bridge: Bridge<Payload, C>,
   ): Provider<C> => {
-    return impl(options, (payload) => {
-      const results = bridge(payload);
+    return impl(options, async (payload) => {
+      const results = await bridge(payload);
       return schema.parse.user(results);
     });
   };

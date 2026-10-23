@@ -1,6 +1,7 @@
 packages:
   - "packages/*"
   - "integrations/*"
+  - "providers/*"
 
 catalog:
   "@changesets/changelog-github": "^0.7.0"

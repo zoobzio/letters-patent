@@ -39,14 +39,14 @@ const createFakeProvider = defineProvider<FakeOptions, FakeSession>(
   (options, bridge) => ({
     login: async (state) => {
       if (options.session) {
-        state.current = bridge(options.session);
+        state.current = await bridge(options.session);
       }
     },
     logout: async (state) => {
       state.current = null;
     },
     resolve: async (state) => {
-      state.current = options.session ? bridge(options.session) : null;
+      state.current = options.session ? await bridge(options.session) : null;
     },
   }),
 );
@@ -123,6 +123,35 @@ describe("defineProvider", () => {
 
     await expect(provider.resolve(state, schema)).rejects.toThrow(SchemaError);
     expect(state.current).toBeNull();
+  });
+
+  it("awaits an asynchronous bridge — grants fetched at the boundary", async () => {
+    const state: State<C> = { current: null };
+    const lookup = async (sub: string) => ({
+      scopes: sub === "user-1" ? ["docs:read"] : [],
+      roles: [] as string[],
+    });
+    const provider = createFakeProvider(
+      schema,
+      { session },
+      async (payload) => {
+        const record = await lookup(payload.sub);
+        return {
+          id: payload.sub,
+          scopes: record.scopes,
+          roles: record.roles,
+          meta: { plan: "free" },
+        };
+      },
+    );
+
+    await provider.resolve(state, schema);
+    expect(state.current).toEqual({
+      id: "user-1",
+      scopes: ["docs:read"],
+      roles: [],
+      meta: { plan: "free" },
+    });
   });
 
   it("leaves state untouched for an out-of-band login", async () => {

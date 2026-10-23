@@ -13,7 +13,8 @@
       "@letters-patent/core",
       "@letters-patent/kit",
       "@letters-patent/schema",
-      "@letters-patent/nuxt"
+      "@letters-patent/nuxt",
+      "@letters-patent/google"
     ]
   ],
   "linked": [],

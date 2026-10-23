@@ -29,7 +29,19 @@ export interface State<C extends Contract> {
  */
 export type Bridge<Payload, C extends Contract> = (
   payload: Payload,
-) => User<Meta<C>>;
+) => User<Meta<C>> | Promise<User<Meta<C>>>;
+
+/**
+ * An out-of-band continuation: the flow proceeds at `location`, outside
+ * letters-patent. A redirect-based provider returns one from `login` (the
+ * authorization URL at the auth host) and from `callback` (the in-app path
+ * to land on once the session is established). The host — the server
+ * handlers of an integration — turns it into an HTTP answer; the service
+ * itself never navigates.
+ */
+export interface Redirect {
+  location: string;
+}
 
 /**
  * The interaction contract between letters-patent and an authentication service.
@@ -44,9 +56,20 @@ export interface Provider<C extends Contract> {
   /**
    * Initiate authentication, assigning `state.current` on success. A flow
    * that continues out-of-band (redirect-based login) leaves state
-   * untouched — `resolve` picks the session up when the flow returns.
+   * untouched and returns the {@link Redirect} to continue at — `callback`
+   * or `resolve` picks the session up when the flow returns.
    */
-  login(state: State<C>, schema: Schema<C>): Promise<void>;
+  login(state: State<C>, schema: Schema<C>): Promise<void | Redirect>;
+
+  /**
+   * Complete an out-of-band login: the return leg of a redirect-based flow,
+   * reached when the auth host sends the browser back. Consumes whatever
+   * the host handed over (an authorization code, a token) from the
+   * provider's own request context, establishes the session, assigns
+   * `state.current`, and returns the in-app {@link Redirect} to land on.
+   * Driven by an integration's server handlers, never by the service.
+   */
+  callback?(state: State<C>, schema: Schema<C>): Promise<void | Redirect>;
 
   /**
    * Tear down the session of `state.current` on the authentication side.

@@ -23,8 +23,9 @@ export const createAuth0Provider = defineProvider<Auth0Options, Auth0Session>(
     logout: async (state) => { ... },
     resolve: async (state) => {
       const session = await readSession(options);
-      // The bridge is instrumented: its result is already schema-proven.
-      state.current = session ? bridge(session) : null;
+      // The bridge is instrumented: it is awaited, and its result is
+      // already schema-proven.
+      state.current = session ? await bridge(session) : null;
     },
   }),
 );
@@ -37,3 +38,48 @@ const provider = createAuth0Provider(schema, { domain, clientId }, (session) => 
   meta: { plan: session.app_metadata.plan },
 }));
 ```
+
+A bridge may be asynchronous. An auth host rarely knows the app's scopes and
+roles; the bridge is where the app looks its own record up by what the host
+does know and grants from there:
+
+```ts
+const provider = createGoogleProvider(schema, options, async (claims) => {
+  const account = await db.account.findBySubject(claims.sub);
+  return {
+    id: claims.sub,
+    email: claims.email,
+    scopes: account?.scopes ?? [],
+    roles: account?.roles ?? [],
+    meta: { plan: account?.plan ?? "free" },
+  };
+});
+```
+
+## Redirect-based flows
+
+A flow that leaves the app — OAuth, OpenID Connect — has two legs, and the
+contract has a callback for each. `login` returns a `Redirect` naming the
+authorization URL at the auth host and leaves state untouched. When the host
+sends the browser back, `callback` consumes what it handed over from the
+provider's own request context, establishes the session, assigns
+`state.current`, and returns the `Redirect` to land on within the app.
+
+```ts
+login: async () => {
+  const flow = beginFlow(options); // state, nonce, verifier → a cookie
+  return { location: authorizationUrl(options, flow) };
+},
+callback: async (state) => {
+  const flow = endFlow(options); // the cookie, checked against the query
+  const claims = await exchangeAndVerify(options, flow);
+  state.current = await bridge(claims);
+  return { location: flow.redirect };
+},
+```
+
+A `Redirect` is data: the provider never writes a response. The host — an
+integration's server handlers — turns it into a 302 for a navigating browser
+or hands it to the browser transport as data. `callback` is driven by those
+handlers alone; the service's own lifecycle has `login`, `logout`, `resolve`,
+and `refresh`.

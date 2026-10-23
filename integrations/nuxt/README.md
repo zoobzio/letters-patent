@@ -65,6 +65,62 @@ const user = useUser(); // reactive User | null, shorthand for auth.current
 `can`/`is` carry the contract's vocabulary in their types — an undeclared
 scope fails to compile in the app.
 
+## Redirect-based providers
+
+A provider that leaves the app for its auth host — Google, any OAuth or
+OpenID Connect service — returns a continuation from `login` and completes
+the flow in `callback`. The handlers serve both:
+
+- `auth.login()` from a component POSTs to `${prefix}/login`; the handler
+  answers with the location as data and the transport navigates the browser
+  there. State is untouched until the flow returns.
+- A plain link or `navigateTo(..., { external: true })` to
+  `${prefix}/login?redirect=/editor` works too: a navigating browser is sent
+  on with a 302, and `redirect` names the in-app path to land on afterwards
+  (an off-site value is ignored). The `auth` middleware already leaves the
+  attempted path in the login page's `redirect` query parameter to pass on.
+- The auth host sends the browser back to `${prefix}/callback`, which the
+  provider's redirect URI must name — `https://app.example/api/auth/callback`
+  for the default prefix. The handler establishes the session and 302s to
+  the path the provider names.
+
+With [`@letters-patent/google`](../../providers/google):
+
+```ts
+// server/api/auth/[action].ts
+import { defineSchema } from "letters-patent";
+import { createGoogleProvider } from "@letters-patent/google";
+import { contract } from "../../../shared/contract";
+
+const schema = defineSchema(contract);
+
+export default defineAuthHandlers(schema, (event) => {
+  const config = useRuntimeConfig(event);
+  return createGoogleProvider(
+    schema,
+    {
+      event,
+      clientId: config.google.clientId,
+      clientSecret: config.google.clientSecret,
+      redirectUri: `${config.public.origin}/api/auth/callback`,
+      secret: config.sessionSecret,
+    },
+    async (claims) => {
+      const account = await findAccount(claims.sub);
+      return {
+        id: claims.sub,
+        email: claims.email,
+        name: claims.name,
+        avatar: claims.picture,
+        scopes: account?.scopes ?? [],
+        roles: account?.roles ?? [],
+        meta: { plan: account?.plan ?? "free" },
+      };
+    },
+  );
+});
+```
+
 ## Protecting pages
 
 The module registers a named `auth` route middleware. Opt in per page, and
@@ -107,6 +163,11 @@ typed by the contract, so an undeclared scope or role fails to compile.
   refetch or auth flash on hydration.
 - The module's transport is itself a provider whose vendor is the app's own
   auth routes: every callback dials `${prefix}/*`, and each answer is proven
-  against the schema before it lands in state.
+  against the schema before it lands in state. A `login` answer that is a
+  continuation rather than a user sends the browser to the auth host.
+- The handlers serve `session`, `login`, `callback`, `logout`, and
+  `refresh`. A continuation a provider returns from `login` or `callback`
+  becomes a 302 for a navigating browser (`Sec-Fetch-Mode: navigate`, or an
+  `Accept` for HTML) and data for a fetch.
 - The user's provider runs only inside the server handlers, constructed per
   request with the h3 event; the auth host never reaches the browser.
