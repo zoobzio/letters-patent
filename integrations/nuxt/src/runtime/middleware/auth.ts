@@ -12,7 +12,8 @@ import { guard } from "../guard";
 /**
  * The named `auth` route middleware. Opt in per page with
  * `definePageMeta({ middleware: "auth" })`; declare requirements with the
- * contract's own vocabulary via `definePageMeta({ auth: { scopes, roles } })`.
+ * contract's own vocabulary via
+ * `definePageMeta({ auth: { scopes, roles, groups, entitlements } })`.
  *
  * An unauthenticated visitor is sent to the configured login route with the
  * attempted path in the `redirect` query parameter; an authenticated user

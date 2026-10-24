@@ -1,0 +1,25 @@
+{
+  "name": "@letters-patent/example-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "lint": "oxlint",
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@letters-patent/example-patents": "workspace:*",
+    "@letters-patent/nuxt": "workspace:*",
+    "h3": "catalog:",
+    "letters-patent": "workspace:*",
+    "nuxt": "catalog:"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "vue": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

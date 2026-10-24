@@ -18,6 +18,8 @@ describe("letters-patent", () => {
     const contract = {
       scopes: ["docs:read"],
       roles: ["editor"],
+      groups: [],
+      entitlements: [],
       meta: { plan: ["free", "pro"] },
     } as const;
 
@@ -28,10 +30,13 @@ describe("letters-patent", () => {
     const declared = defineLettersPatentConfig({
       scopes: ["docs:read"],
       roles: ["editor"],
+      groups: ["eng"],
+      entitlements: [],
       meta: { plan: ["free", "pro"] },
     });
     expectTypeOf(declared.scopes).toEqualTypeOf<readonly ["docs:read"]>();
     expectTypeOf(declared.roles).toEqualTypeOf<readonly ["editor"]>();
+    expectTypeOf(declared.groups).toEqualTypeOf<readonly ["eng"]>();
     expectTypeOf(declared.meta.plan).toEqualTypeOf<readonly ["free", "pro"]>();
   });
 
@@ -44,6 +49,8 @@ describe("letters-patent", () => {
     const schema = defineSchema({
       scopes: ["docs:read", "docs:write"],
       roles: ["editor", "admin"],
+      groups: ["eng"],
+      entitlements: ["beta"],
       meta: {},
     });
 
@@ -52,9 +59,10 @@ describe("letters-patent", () => {
       logout: async () => {},
       resolve: async (state) => {
         state.current = {
-          id: "user-1",
+          sub: "user-1",
           scopes: ["docs:read"],
           roles: ["editor"],
+          groups: ["eng"],
           meta: {},
         };
       },
@@ -67,5 +75,7 @@ describe("letters-patent", () => {
     expect(patent.can("docs:write")).toBe(false);
     expect(patent.is("editor")).toBe(true);
     expect(patent.is("admin")).toBe(false);
+    expect(patent.in("eng")).toBe(true);
+    expect(patent.has("beta")).toBe(false);
   });
 });

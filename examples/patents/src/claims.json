@@ -1,0 +1,14 @@
+{
+  "id_token": {
+    "email": { "essential": true },
+    "email_verified": null,
+    "name": null,
+    "picture": null,
+    "roles": { "essential": true, "values": ["admin", "editor", "viewer"] },
+    "groups": { "values": ["engineering", "sales"] },
+    "entitlements": { "values": ["beta", "export"] },
+    "plan": { "essential": true, "values": ["free", "team", "enterprise"] },
+    "workspace": { "essential": true },
+    "locale": null
+  }
+}

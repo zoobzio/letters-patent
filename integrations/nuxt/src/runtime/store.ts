@@ -1,4 +1,4 @@
-import type { AppContract } from "#build/types/letters-patent.d.ts";
+import type { Contract as AppContract } from "#build/letters-patent/config.mjs";
 import type { State } from "letters-patent/sdk";
 import type { Ref } from "vue";
 

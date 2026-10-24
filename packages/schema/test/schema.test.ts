@@ -5,18 +5,24 @@ import { SchemaError, defineSchema } from "../src/index";
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
   roles: ["admin", "editor"],
+  groups: ["eng", "sales"],
+  entitlements: ["beta"],
   meta: {
     plan: ["free", "pro"],
     org: "string",
     age: "number?",
     beta: "boolean?",
+    tags: "string[]?",
+    tier: { values: [1, 2, 3], optional: true },
   },
 });
 
 const ada = {
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read"],
   roles: ["editor"],
+  groups: ["eng"],
+  entitlements: [],
   meta: { plan: "pro", org: "zoobz" },
 };
 
@@ -30,6 +36,8 @@ describe("defineSchema", () => {
       defineSchema({
         scopes: ["a", "a"],
         roles: [],
+        groups: [],
+        entitlements: [],
         meta: {},
       }),
     ).toThrow(SchemaError);
@@ -37,6 +45,8 @@ describe("defineSchema", () => {
       defineSchema({
         scopes: [],
         roles: [],
+        groups: [],
+        entitlements: [],
         meta: { plan: "text" as never },
       }),
     ).toThrow(SchemaError);
@@ -44,6 +54,8 @@ describe("defineSchema", () => {
       defineSchema({
         scopes: [],
         roles: [],
+        groups: [],
+        entitlements: [],
         meta: { plan: [] as never },
       }),
     ).toThrow(SchemaError);
@@ -52,7 +64,11 @@ describe("defineSchema", () => {
   it("derives the vocabulary sets", () => {
     expect(schema.enums.scopes).toEqual(new Set(["docs:read", "docs:write"]));
     expect(schema.enums.roles).toEqual(new Set(["admin", "editor"]));
-    expect(schema.enums.meta).toEqual(new Set(["plan", "org", "age", "beta"]));
+    expect(schema.enums.groups).toEqual(new Set(["eng", "sales"]));
+    expect(schema.enums.entitlements).toEqual(new Set(["beta"]));
+    expect(schema.enums.meta).toEqual(
+      new Set(["plan", "org", "age", "beta", "tags", "tier"]),
+    );
     expect(schema.base.scopes).toEqual(["docs:read", "docs:write"]);
   });
 
@@ -60,13 +76,21 @@ describe("defineSchema", () => {
     // Compile-time proof: the parsed values are literal unions, not string.
     const scope: "docs:read" | "docs:write" = schema.parse.scope("docs:read");
     const role: "admin" | "editor" = schema.parse.role("editor");
+    const group: "eng" | "sales" = schema.parse.group("eng");
+    const entitlement: "beta" = schema.parse.entitlement("beta");
     const meta = schema.parse.meta({ plan: "free", org: "zoobz" });
     const plan: "free" | "pro" = meta.plan;
     const age: number | undefined = meta.age;
-    expect([scope, role, plan, age]).toEqual([
+    const tags: string[] | undefined = meta.tags;
+    const tier: 1 | 2 | 3 | undefined = meta.tier;
+    expect([scope, role, group, entitlement, plan, age, tags, tier]).toEqual([
       "docs:read",
       "editor",
+      "eng",
+      "beta",
       "free",
+      undefined,
+      undefined,
       undefined,
     ]);
   });
@@ -75,10 +99,18 @@ describe("defineSchema", () => {
 describe("contract kind", () => {
   it("gates untrusted contract data", () => {
     expect(schema.check.contract(schema.base)).toBe(true);
+    expect(
+      schema.check.contract({
+        scopes: [],
+        roles: [],
+        groups: [],
+        entitlements: [],
+        meta: {},
+      }),
+    ).toBe(true);
     expect(schema.check.contract({ scopes: [], roles: [], meta: {} })).toBe(
-      true,
+      false,
     );
-    expect(schema.check.contract({ scopes: [], roles: [] })).toBe(false);
     expect(schema.check.contract(null)).toBe(false);
   });
 
@@ -86,6 +118,8 @@ describe("contract kind", () => {
     const result = schema.inspect.contract({
       scopes: ["a", "a"],
       roles: [7],
+      groups: [],
+      entitlements: [""],
       meta: { plan: "text" },
     });
     expect(result.success).toBe(false);
@@ -93,20 +127,25 @@ describe("contract kind", () => {
     expect(result.issues).toEqual([
       expect.objectContaining({ code: "duplicate", path: ["scopes", 1] }),
       expect.objectContaining({ code: "not_string", path: ["roles", 0] }),
+      expect.objectContaining({ code: "empty", path: ["entitlements", 0] }),
       expect.objectContaining({ code: "not_field", path: ["meta", "plan"] }),
     ]);
   });
 });
 
-describe("scope and role kinds", () => {
+describe("member kinds", () => {
   it("accepts declared members", () => {
     expect(schema.check.scope("docs:write")).toBe(true);
     expect(schema.check.role("admin")).toBe(true);
+    expect(schema.check.group("sales")).toBe(true);
+    expect(schema.check.entitlement("beta")).toBe(true);
   });
 
   it("rejects undeclared members and non-strings", () => {
     expect(schema.check.scope("docs:delete")).toBe(false);
     expect(schema.check.role(42)).toBe(false);
+    expect(schema.check.group("ops")).toBe(false);
+    expect(schema.check.entitlement("alpha")).toBe(false);
     const result = schema.inspect.scope("docs:delete");
     expect(result.success).toBe(false);
     if (result.success) return;
@@ -119,11 +158,13 @@ describe("scope and role kinds", () => {
   });
 });
 
-describe("scopes and roles kinds", () => {
+describe("list kinds", () => {
   it("accepts lists drawn from the vocabulary", () => {
     expect(schema.check.scopes([])).toBe(true);
     expect(schema.check.scopes(["docs:read", "docs:write"])).toBe(true);
     expect(schema.check.roles(["editor"])).toBe(true);
+    expect(schema.check.groups(["eng", "sales"])).toBe(true);
+    expect(schema.check.entitlements(["beta"])).toBe(true);
   });
 
   it("points at the undeclared entry", () => {
@@ -140,14 +181,26 @@ describe("meta kind", () => {
   it("accepts a construction matching the declarations", () => {
     expect(schema.check.meta({ plan: "free", org: "zoobz" })).toBe(true);
     expect(
-      schema.check.meta({ plan: "pro", org: "zoobz", age: 42, beta: true }),
+      schema.check.meta({
+        plan: "pro",
+        org: "zoobz",
+        age: 42,
+        beta: true,
+        tags: ["a", "b"],
+        tier: 2,
+      }),
     ).toBe(true);
   });
 
-  it("treats ?-suffixed fields as optional", () => {
+  it("treats ?-suffixed fields and optional choices as optional", () => {
     expect(schema.check.meta({ plan: "free", org: "zoobz" })).toBe(true);
     expect(
-      schema.check.meta({ plan: "free", org: "zoobz", age: undefined }),
+      schema.check.meta({
+        plan: "free",
+        org: "zoobz",
+        age: undefined,
+        tier: undefined,
+      }),
     ).toBe(true);
   });
 
@@ -164,7 +217,7 @@ describe("meta kind", () => {
     const result = schema.inspect.meta({
       plan: "free",
       org: "zoobz",
-      tier: "gold",
+      extra: "gold",
     });
     expect(result.success).toBe(false);
     if (result.success) return;
@@ -174,13 +227,21 @@ describe("meta kind", () => {
   });
 
   it("rules each member by its declaration", () => {
-    const result = schema.inspect.meta({ plan: "gold", org: 7, age: "old" });
+    const result = schema.inspect.meta({
+      plan: "gold",
+      org: 7,
+      age: "old",
+      tags: ["a", 1],
+      tier: 9,
+    });
     expect(result.success).toBe(false);
     if (result.success) return;
     expect(result.issues).toEqual([
       expect.objectContaining({ code: "not_member", path: ["plan"] }),
       expect.objectContaining({ code: "not_string", path: ["org"] }),
       expect.objectContaining({ code: "not_number", path: ["age"] }),
+      expect.objectContaining({ code: "not_string", path: ["tags", 1] }),
+      expect.objectContaining({ code: "not_member", path: ["tier"] }),
     ]);
   });
 });
@@ -191,15 +252,21 @@ describe("user kind", () => {
     expect(schema.parse.user(ada)).toBe(ada);
   });
 
+  it("reads absent grants as none", () => {
+    expect(schema.check.user({ sub: "u", meta: ada.meta })).toBe(true);
+  });
+
   it("rejects grants outside the vocabulary, with the path", () => {
     const result = schema.inspect.user({
       ...ada,
       scopes: ["docs:read", "docs:delete"],
+      groups: ["ops"],
     });
     expect(result.success).toBe(false);
     if (result.success) return;
     expect(result.issues).toEqual([
       expect.objectContaining({ code: "not_member", path: ["scopes", 1] }),
+      expect.objectContaining({ code: "not_member", path: ["groups", 0] }),
     ]);
   });
 
@@ -216,18 +283,17 @@ describe("user kind", () => {
     ]);
   });
 
-  it("accepts the optional identity members", () => {
+  it("accepts the standard claims", () => {
     expect(
       schema.check.user({
         ...ada,
         email: "ada@example.com",
+        email_verified: true,
         name: "Ada",
-        username: "ada",
-        avatar: "https://example.com/ada.png",
-        status: "active",
-        issued: 1740000000000,
-        expires: 1750000000000,
-        verified: true,
+        preferred_username: "ada",
+        picture: "https://example.com/ada.png",
+        iat: 1740000000,
+        exp: 1750000000,
       }),
     ).toBe(true);
   });
@@ -235,19 +301,19 @@ describe("user kind", () => {
   it("rejects non-objects and missing members", () => {
     expect(schema.check.user(null)).toBe(false);
     expect(schema.check.user("user")).toBe(false);
-    expect(schema.check.user({ id: "u", scopes: [], roles: [] })).toBe(false);
+    expect(schema.check.user({ sub: "u", scopes: [], roles: [] })).toBe(false);
+    expect(schema.check.user({ scopes: [], roles: [], meta: {} })).toBe(false);
   });
 
-  it("still rules the identity members", () => {
-    expect(schema.check.user({ ...ada, id: "" })).toBe(false);
-    expect(schema.check.user({ ...ada, id: "  " })).toBe(false);
+  it("still rules the standard claims", () => {
+    expect(schema.check.user({ ...ada, sub: "" })).toBe(false);
+    expect(schema.check.user({ ...ada, sub: "  " })).toBe(false);
     expect(schema.check.user({ ...ada, email: 42 })).toBe(false);
+    expect(schema.check.user({ ...ada, email_verified: "yes" })).toBe(false);
     expect(schema.check.user({ ...ada, name: {} })).toBe(false);
-    expect(schema.check.user({ ...ada, username: 7 })).toBe(false);
-    expect(schema.check.user({ ...ada, avatar: [] })).toBe(false);
-    expect(schema.check.user({ ...ada, status: true })).toBe(false);
-    expect(schema.check.user({ ...ada, issued: "yesterday" })).toBe(false);
-    expect(schema.check.user({ ...ada, expires: "tomorrow" })).toBe(false);
-    expect(schema.check.user({ ...ada, verified: "yes" })).toBe(false);
+    expect(schema.check.user({ ...ada, preferred_username: 7 })).toBe(false);
+    expect(schema.check.user({ ...ada, picture: [] })).toBe(false);
+    expect(schema.check.user({ ...ada, iat: "yesterday" })).toBe(false);
+    expect(schema.check.user({ ...ada, exp: "tomorrow" })).toBe(false);
   });
 });

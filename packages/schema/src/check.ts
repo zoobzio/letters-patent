@@ -13,8 +13,12 @@ export const defineCheck = <C extends Contract>(rules: Rules): Check<C> => {
     contract: check<"contract">(rules.contract),
     scope: check<"scope">(rules.scope),
     role: check<"role">(rules.role),
+    group: check<"group">(rules.group),
+    entitlement: check<"entitlement">(rules.entitlement),
     scopes: check<"scopes">(rules.scopes),
     roles: check<"roles">(rules.roles),
+    groups: check<"groups">(rules.groups),
+    entitlements: check<"entitlements">(rules.entitlements),
     meta: check<"meta">(rules.meta),
     user: check<"user">(rules.user),
   };

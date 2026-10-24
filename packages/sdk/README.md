@@ -32,9 +32,10 @@ export const createAuth0Provider = defineProvider<Auth0Options, Auth0Session>(
 
 // app: the schema pins the contract; the bridge is checked against it
 const provider = createAuth0Provider(schema, { domain, clientId }, (session) => ({
-  id: session.sub,
+  sub: session.sub,
   scopes: session.permissions,
-  roles: session.groups,
+  roles: session.roles,
+  groups: session.groups,
   meta: { plan: session.app_metadata.plan },
 }));
 ```

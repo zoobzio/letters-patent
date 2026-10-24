@@ -1,4 +1,4 @@
-import type { Field, Issue, Rule } from "./types";
+import type { Choice, Field, Issue, Keyword, Literals, Rule } from "./types";
 
 import { object, keys, entries } from "objectively";
 import { KEYWORDS } from "./constant";
@@ -118,13 +118,16 @@ export const list =
   };
 
 /**
- * A string value is a member of a declared set. Non-strings yield no issue —
- * the text rule owns that failure.
+ * A value of the set's own type — strings, or numbers for a numeric enum —
+ * is a member of the declared set. Other values yield no issue — the text
+ * and numeric rules own those failures.
  */
 export const member =
-  (name: string, set: ReadonlySet<string>): Rule =>
+  (name: string, set: ReadonlySet<string | number>): Rule =>
   (v) => {
-    if (typeof v === "string" && !set.has(v)) {
+    const [first] = set;
+    const kind = typeof first === "number" ? "number" : "string";
+    if (typeof v === kind && !set.has(v as string | number)) {
       return {
         code: "not_member",
         message: `${name} is not declared by the contract.`,
@@ -256,21 +259,63 @@ export const optional = (rules: Rule[]): Rule[] =>
         v === undefined ? undefined : rule(v),
   );
 
-/**
- * The value is a well-formed {@link Field} declaration: a scalar keyword or
- * an enum of non-empty string literals.
+/*
+ * Field declarations. A field is a keyword, an enum, or a choice; the
+ * helpers below read a declaration apart so the rules and the kit agree on
+ * what each form means.
  */
-export const spec =
+
+/**
+ * The keyword of a scalar declaration, with any `?` suffix removed, or
+ * `undefined` when the value is not a known keyword.
+ */
+export const keyword = (declared: unknown): Keyword | undefined => {
+  if (typeof declared !== "string") {
+    return undefined;
+  }
+  const bare = declared.endsWith("?") ? declared.slice(0, -1) : declared;
+  return KEYWORDS.has(bare) ? (bare as Keyword) : undefined;
+};
+
+/**
+ * Whether a {@link Field} declaration admits an absent member: a
+ * `?`-suffixed keyword, or a {@link Choice} marked optional.
+ */
+export const absent = (declared: Field): boolean => {
+  if (typeof declared === "string") {
+    return declared.endsWith("?");
+  }
+  if (Array.isArray(declared)) {
+    return false;
+  }
+  return (declared as Choice).optional === true;
+};
+
+/**
+ * The literals of an enum or choice declaration, or `undefined` for a
+ * scalar keyword.
+ */
+export const literals = (declared: Field): Literals | undefined => {
+  if (typeof declared === "string") {
+    return undefined;
+  }
+  if (Array.isArray(declared)) {
+    return declared as Literals;
+  }
+  return (declared as Choice).values;
+};
+
+/**
+ * Rules an enum's literals: non-empty, all strings or all numbers, no
+ * empty strings. The nested issue is prefixed with the literal's index.
+ */
+const enumeration =
   (name: string): Rule =>
   (v) => {
-    if (typeof v === "string" && KEYWORDS.has(v)) {
-      return;
-    }
     if (!Array.isArray(v)) {
       return {
-        code: "not_field",
-        message: `${name} must be a scalar keyword or an enum of literals.`,
-        expected: [...KEYWORDS],
+        code: "not_array",
+        message: `${name} must declare its literals as an array.`,
         received: v,
       };
     }
@@ -281,9 +326,11 @@ export const spec =
         received: v,
       };
     }
+    const numbers = typeof v[0] === "number";
     for (const [index, entry] of v.entries()) {
-      const issue =
-        text(`${name} literal`)(entry) ?? filled(`${name} literal`)(entry);
+      const issue = numbers
+        ? numeric(`${name} literal`)(entry)
+        : (text(`${name} literal`)(entry) ?? filled(`${name} literal`)(entry));
       if (issue) {
         return nest(index, issue);
       }
@@ -291,23 +338,87 @@ export const spec =
   };
 
 /**
+ * The value is a well-formed {@link Field} declaration: a scalar keyword,
+ * an enum of literals, or a choice of literals.
+ */
+export const spec =
+  (name: string): Rule =>
+  (v) => {
+    if (typeof v === "string") {
+      if (keyword(v) !== undefined) {
+        return;
+      }
+      return {
+        code: "not_field",
+        message: `${name} must be a scalar keyword, an enum of literals, or a choice.`,
+        expected: [...KEYWORDS],
+        received: v,
+      };
+    }
+    if (Array.isArray(v)) {
+      return enumeration(name)(v);
+    }
+    if (!object(v) || !("values" in v)) {
+      return {
+        code: "not_field",
+        message: `${name} must be a scalar keyword, an enum of literals, or a choice.`,
+        expected: [...KEYWORDS],
+        received: v,
+      };
+    }
+    const stray = subset(name, new Set(["values", "optional"]))(v);
+    if (stray) {
+      return stray;
+    }
+    const issue = enumeration(name)(v.values);
+    if (issue) {
+      return nest("values", issue);
+    }
+    if (v.optional !== undefined && typeof v.optional !== "boolean") {
+      return nest("optional", {
+        code: "not_boolean",
+        message: `${name} optional must be a boolean.`,
+        received: v.optional,
+      });
+    }
+  };
+
+/**
+ * The rule for one scalar keyword.
+ */
+const scalar = (name: string, word: Keyword): Rule => {
+  switch (word) {
+    case "number":
+      return numeric(name);
+    case "boolean":
+      return flag(name);
+    case "string[]":
+      return list(name, [text(name)]);
+    case "number[]":
+      return list(name, [numeric(name)]);
+    default:
+      return text(name);
+  }
+};
+
+/**
  * The value satisfies a {@link Field} declaration: a scalar of the declared
- * keyword (`undefined` admitted by the `?`-suffixed forms) or a member of
- * the declared enum. Delegates to the scalar and member atoms, so the issue
- * carries their codes.
+ * keyword, or a member of the declared literals — `undefined` admitted when
+ * the declaration is optional. Delegates to the scalar and member atoms, so
+ * the issue carries their codes.
  */
 export const field = (name: string, declared: Field): Rule => {
-  if (typeof declared !== "string") {
-    const literal = member(name, new Set(declared));
-    return (v) => text(name)(v) ?? literal(v);
+  const values = literals(declared);
+  let rule: Rule;
+  if (values !== undefined) {
+    const literal = member(name, new Set<string | number>(values));
+    const type = typeof values[0] === "number" ? numeric(name) : text(name);
+    rule = (v) => type(v) ?? literal(v);
+  } else {
+    rule = scalar(name, keyword(declared) ?? "string");
   }
-  const scalar = declared.startsWith("number")
-    ? numeric(name)
-    : declared.startsWith("boolean")
-      ? flag(name)
-      : text(name);
-  if (!declared.endsWith("?")) {
-    return scalar;
+  if (!absent(declared)) {
+    return rule;
   }
-  return (v) => (v === undefined ? undefined : scalar(v));
+  return (v) => (v === undefined ? undefined : rule(v));
 };

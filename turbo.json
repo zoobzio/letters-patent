@@ -15,6 +15,16 @@
     },
     "test": {
       "dependsOn": ["^build"]
+    },
+    "@letters-patent/example-patents#typecheck": {
+      "dependsOn": ["build", "^build"]
+    },
+    "@letters-patent/example-patents#test": {
+      "dependsOn": ["build", "^build"]
+    },
+    "@letters-patent/example-nuxt#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", ".nuxt/**"]
     }
   }
 }

@@ -1,0 +1,7 @@
+{
+  "resource": "https://app.example",
+  "authorization_servers": ["https://accounts.google.com"],
+  "scopes_supported": ["docs:read", "docs:write"],
+  "bearer_methods_supported": ["header"],
+  "resource_documentation": "https://app.example/docs/api"
+}

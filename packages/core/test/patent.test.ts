@@ -7,15 +7,19 @@ import { definePatent } from "../src/index";
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write", "admin"],
   roles: ["editor", "admin", "owner"],
+  groups: ["eng", "sales", "ops"],
+  entitlements: ["beta", "export"],
   meta: { name: "string" },
 });
 
 type C = (typeof schema)["base"];
 
 const ada = (): User<Meta<C>> => ({
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read", "docs:write"],
   roles: ["editor"],
+  groups: ["eng"],
+  entitlements: ["beta"],
   meta: { name: "Ada" },
 });
 
@@ -96,7 +100,7 @@ describe("resolve", () => {
   it("rejects a provider write that violates the contract", async () => {
     const provider = fakeProvider({
       resolve: vi.fn(async (state) => {
-        state.current = { id: "" } as unknown as User<Meta<C>>;
+        state.current = { sub: "" } as unknown as User<Meta<C>>;
       }),
     });
     const patent = definePatent(schema, provider);
@@ -204,7 +208,7 @@ describe("refresh", () => {
   it("lets the provider revalidate state in place", async () => {
     const provider = fakeProvider({
       refresh: vi.fn(async (state) => {
-        state.current = { ...ada(), expires: 2000 };
+        state.current = { ...ada(), exp: 2000 };
       }),
     });
     const patent = definePatent(schema, provider);
@@ -212,7 +216,7 @@ describe("refresh", () => {
 
     await expect(patent.refresh()).resolves.toEqual({
       ...ada(),
-      expires: 2000,
+      exp: 2000,
     });
     expect(provider.refresh).toHaveBeenCalledOnce();
   });
@@ -261,7 +265,7 @@ describe("deep mutation", () => {
     patent.on("change", onChange);
 
     expect(() => {
-      patent.current!.scopes.push("docs:delete" as never);
+      patent.current!.scopes!.push("docs:delete" as never);
     }).toThrow(SchemaError);
     expect(patent.current?.scopes).toEqual(ada().scopes);
     expect(onChange).not.toHaveBeenCalled();
@@ -329,6 +333,72 @@ describe("is", () => {
   });
 });
 
+describe("in", () => {
+  it("grants when the user belongs to any of the groups", async () => {
+    const patent = definePatent(schema, fakeProvider());
+    await patent.resolve();
+
+    expect(patent.in("eng")).toBe(true);
+    expect(patent.in("sales", "eng")).toBe(true);
+  });
+
+  it("denies when the user belongs to none and emits the denial", async () => {
+    const patent = definePatent(schema, fakeProvider());
+    await patent.resolve();
+    const onDenied = vi.fn();
+    patent.on("denied", onDenied);
+
+    expect(patent.in("sales", "ops")).toBe(false);
+    expect(onDenied).toHaveBeenCalledWith({
+      check: "group",
+      required: ["sales", "ops"],
+      user: ada(),
+    });
+  });
+});
+
+describe("has", () => {
+  it("grants when the user holds any of the entitlements", async () => {
+    const patent = definePatent(schema, fakeProvider());
+    await patent.resolve();
+
+    expect(patent.has("beta")).toBe(true);
+    expect(patent.has("export", "beta")).toBe(true);
+  });
+
+  it("denies when the user holds none and emits the denial", async () => {
+    const patent = definePatent(schema, fakeProvider());
+    await patent.resolve();
+    const onDenied = vi.fn();
+    patent.on("denied", onDenied);
+
+    expect(patent.has("export")).toBe(false);
+    expect(onDenied).toHaveBeenCalledWith({
+      check: "entitlement",
+      required: ["export"],
+      user: ada(),
+    });
+  });
+});
+
+describe("absent grants", () => {
+  it("reads an absent grant list as none", async () => {
+    const provider = fakeProvider({
+      resolve: vi.fn(async (state) => {
+        state.current = { sub: "user-2", meta: { name: "Grace" } };
+      }),
+    });
+    const patent = definePatent(schema, provider);
+    await patent.resolve();
+
+    expect(patent.authenticated).toBe(true);
+    expect(patent.can("docs:read")).toBe(false);
+    expect(patent.is("editor")).toBe(false);
+    expect(patent.in("eng")).toBe(false);
+    expect(patent.has("beta")).toBe(false);
+  });
+});
+
 describe("vocabulary", () => {
   it("carries the contract's vocabulary in the check types", async () => {
     const patent = definePatent(schema, fakeProvider());
@@ -338,6 +408,10 @@ describe("vocabulary", () => {
     expect(patent.can("docs:delete")).toBe(false);
     // @ts-expect-error — a role outside the contract fails to compile
     expect(patent.is("viewer")).toBe(false);
+    // @ts-expect-error — a group outside the contract fails to compile
+    expect(patent.in("hr")).toBe(false);
+    // @ts-expect-error — an entitlement outside the contract fails to compile
+    expect(patent.has("alpha")).toBe(false);
   });
 });
 
@@ -350,10 +424,10 @@ describe("stale", () => {
     expect(patent.stale).toBe(false);
   });
 
-  it("reports staleness from expires without acting on it", async () => {
+  it("reports staleness from exp, in seconds, without acting on it", async () => {
     const provider = fakeProvider({
       resolve: vi.fn(async (state) => {
-        state.current = { ...ada(), expires: Date.now() - 1000 };
+        state.current = { ...ada(), exp: Math.floor(Date.now() / 1000) - 1 };
       }),
     });
     const patent = definePatent(schema, provider);

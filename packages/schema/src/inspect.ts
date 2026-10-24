@@ -27,8 +27,12 @@ export const defineInspect = <C extends Contract>(
     contract: inspect(parse.contract),
     scope: inspect(parse.scope),
     role: inspect(parse.role),
+    group: inspect(parse.group),
+    entitlement: inspect(parse.entitlement),
     scopes: inspect(parse.scopes),
     roles: inspect(parse.roles),
+    groups: inspect(parse.groups),
+    entitlements: inspect(parse.entitlements),
     meta: inspect(parse.meta),
     user: inspect(parse.user),
   };

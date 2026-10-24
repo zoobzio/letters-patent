@@ -8,15 +8,19 @@ import { guard } from "../../src/runtime/guard";
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
   roles: ["editor", "admin"],
+  groups: ["eng", "sales"],
+  entitlements: ["beta", "export"],
   meta: { name: "string" },
 });
 
 type C = (typeof schema)["base"];
 
 const ada = (overrides: Partial<User<Meta<C>>> = {}): User<Meta<C>> => ({
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read"],
   roles: ["editor"],
+  groups: ["eng"],
+  entitlements: ["beta"],
   meta: { name: "Ada" },
   ...overrides,
 });
@@ -57,6 +61,16 @@ describe("guard", () => {
       "granted",
     );
     expect(guard(service(ada()), { roles: ["admin"] })).toBe("denied");
+  });
+
+  it("accepts any listed group or entitlement", () => {
+    expect(guard(service(ada()), { groups: ["sales", "eng"] })).toBe("granted");
+    expect(guard(service(ada()), { groups: ["sales"] })).toBe("denied");
+    expect(guard(service(ada()), { entitlements: ["beta"] })).toBe("granted");
+    expect(guard(service(ada()), { entitlements: ["export"] })).toBe("denied");
+    expect(
+      guard(service(ada({ groups: undefined })), { groups: ["eng"] }),
+    ).toBe("denied");
   });
 
   it("requires scopes and roles together", () => {

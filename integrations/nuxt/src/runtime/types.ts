@@ -1,10 +1,11 @@
-import type { AppContract } from "#build/types/letters-patent.d.ts";
+import type { Contract as AppContract } from "#build/letters-patent/config.mjs";
 import type { AuthRequirements } from "./guard";
 import type { Patent } from "letters-patent";
 
 /**
- * The active contract, derived from the build-time template the module
- * writes from `lettersPatent.contract` in nuxt.config.
+ * The active contract: the `Contract` type of the `config` module the
+ * module writes under `#build/letters-patent/` — from the inline
+ * `lettersPatent.contract`, or the kit config.
  */
 export type { AppContract };
 
@@ -16,7 +17,7 @@ export type AppAuth = Patent<AppContract>;
 
 /**
  * The `auth` page-meta entry the middleware reads, typed by the app's own
- * contract: an undeclared scope or role fails to compile.
+ * contract: an undeclared member fails to compile.
  */
 export type AppAuthRequirements = AuthRequirements<AppContract>;
 

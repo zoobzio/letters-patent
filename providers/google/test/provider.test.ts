@@ -20,11 +20,11 @@ import {
 } from "./harness";
 
 const ada: User<Meta<C>> = {
-  id: "104958204857204857204",
+  sub: "104958204857204857204",
   email: "ada@example.com",
   name: "Ada Lovelace",
-  avatar: "https://lh3.googleusercontent.com/a/photo",
-  verified: true,
+  picture: "https://lh3.googleusercontent.com/a/photo",
+  email_verified: true,
   scopes: ["docs:read", "docs:write"],
   roles: ["editor"],
   meta: { plan: "pro" },
@@ -288,7 +288,7 @@ describe("createGoogleProvider", () => {
     it("refuses a bridge result outside the contract", async () => {
       const google = await fakeGoogle();
       const served = serve(google, {}, (claims) => ({
-        id: claims.sub,
+        sub: claims.sub,
         scopes: ["docs:admin" as "docs:read"],
         roles: [],
         meta: { plan: "free" },
@@ -315,10 +315,8 @@ describe("createGoogleProvider", () => {
       const response = await served.request("session", { navigate: false });
       const user = (await read(response)) as Record<string, unknown>;
       expect(user).toMatchObject(ada);
-      expect(user.issued).toBeTypeOf("number");
-      expect(user.expires).toBe(
-        (user.issued as number) + DEFAULT_MAX_AGE * 1000,
-      );
+      expect(user.iat).toBeTypeOf("number");
+      expect(user.exp).toBe((user.iat as number) + DEFAULT_MAX_AGE);
     });
 
     it("reflects the app's records on every request", async () => {
@@ -326,7 +324,7 @@ describe("createGoogleProvider", () => {
       const served = serve(google);
       await signIn(served, google);
 
-      database.set(ada.id, { scopes: ["docs:read"], roles: [], plan: "free" });
+      database.set(ada.sub, { scopes: ["docs:read"], roles: [], plan: "free" });
       try {
         const response = await served.request("session", { navigate: false });
         await expect(read(response)).resolves.toMatchObject({
@@ -335,7 +333,7 @@ describe("createGoogleProvider", () => {
           meta: { plan: "free" },
         });
       } finally {
-        database.set(ada.id, {
+        database.set(ada.sub, {
           scopes: ["docs:read", "docs:write"],
           roles: ["editor"],
           plan: "pro",
@@ -395,7 +393,7 @@ describe("createGoogleProvider", () => {
       await signIn(served, google);
       const before = (await (
         await served.request("session", { navigate: false })
-      ).json()) as { expires: number };
+      ).json()) as { exp: number };
 
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(Date.now() + 60_000);
@@ -404,10 +402,10 @@ describe("createGoogleProvider", () => {
         method: "POST",
         navigate: false,
       });
-      const after = (await read(response)) as { expires: number };
+      const after = (await read(response)) as { exp: number };
       expect(after).toMatchObject(ada);
-      expect(after.expires).toBeGreaterThanOrEqual(before.expires + 60_000);
-      expect(after.expires).toBeLessThan(before.expires + 61_000);
+      expect(after.exp).toBeGreaterThanOrEqual(before.exp + 60);
+      expect(after.exp).toBeLessThanOrEqual(before.exp + 61);
       expect(google.calls).toHaveLength(calls);
     });
 

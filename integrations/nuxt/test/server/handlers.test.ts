@@ -28,6 +28,8 @@ import { defineAuthHandlers } from "../../src/server/handlers";
 const schema = defineSchema({
   scopes: ["docs:read"],
   roles: ["editor"],
+  groups: [],
+  entitlements: [],
   meta: { name: "string" },
 });
 
@@ -40,7 +42,7 @@ interface FakeEvent {
 }
 
 const ada = (): User<Meta<C>> => ({
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read"],
   roles: ["editor"],
   meta: { name: "Ada" },
@@ -231,14 +233,14 @@ describe("defineAuthHandlers", () => {
   it("refresh revalidates the resolved session", async () => {
     const provider = fakeProvider({
       refresh: vi.fn(async (state) => {
-        state.current = { ...ada(), expires: 2000 };
+        state.current = { ...ada(), exp: 2000 };
       }),
     });
     const { handle } = handlers(provider);
 
     await expect(handle(event("refresh"))).resolves.toEqual({
       ...ada(),
-      expires: 2000,
+      exp: 2000,
     });
   });
 

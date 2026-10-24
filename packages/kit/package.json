@@ -1,0 +1,40 @@
+{
+  "name": "@letters-patent/kit",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/letters-patent.git",
+    "directory": "packages/kit"
+  },
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.mts",
+      "import": "./.dist/index.mjs"
+    }
+  },
+  "bin": {
+    "patent": "./bin/patent.mjs"
+  },
+  "files": [
+    ".dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "obuild",
+    "stub": "obuild --stub",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@letters-patent/schema": "workspace:*",
+    "jiti": "catalog:",
+    "objectively": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

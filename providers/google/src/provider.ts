@@ -113,8 +113,8 @@ const single = (value: unknown): string | undefined =>
  * The bridge receives the verified ID token claims. Google knows nothing of
  * the app's scopes and roles: the bridge supplies them, most often by
  * looking the user up by `sub` or `email`. The provider adds the session's
- * `issued` and `expires` to whatever the bridge returns, unless the bridge
- * set them itself.
+ * `iat` and `exp` (epoch seconds) to whatever the bridge returns, unless the
+ * bridge set them itself.
  */
 export const createGoogleProvider = defineProvider<GoogleOptions, GoogleClaims>(
   (options, bridge) => {
@@ -126,8 +126,8 @@ export const createGoogleProvider = defineProvider<GoogleOptions, GoogleClaims>(
     ): Promise<void> => {
       const user = await bridge(current.claims);
       state.current = {
-        issued: current.issued,
-        expires: current.expires,
+        iat: Math.floor(current.issued / 1000),
+        exp: Math.floor(current.expires / 1000),
         ...user,
       };
     };

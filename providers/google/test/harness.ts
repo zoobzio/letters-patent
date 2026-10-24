@@ -21,6 +21,8 @@ import { createGoogleProvider } from "../src/provider";
 export const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
   roles: ["admin", "editor"],
+  groups: [],
+  entitlements: [],
   meta: { plan: ["free", "pro"] },
 });
 
@@ -42,13 +44,13 @@ export const database = new Map([
 export const bridge: Bridge<GoogleClaims, C> = async (claims) => {
   const account = database.get(claims.sub);
   return {
-    id: claims.sub,
+    sub: claims.sub,
     ...(claims.email === undefined ? {} : { email: claims.email }),
     ...(claims.name === undefined ? {} : { name: claims.name }),
-    ...(claims.picture === undefined ? {} : { avatar: claims.picture }),
+    ...(claims.picture === undefined ? {} : { picture: claims.picture }),
     ...(claims.email_verified === undefined
       ? {}
-      : { verified: claims.email_verified }),
+      : { email_verified: claims.email_verified }),
     scopes: (account?.scopes ?? []) as ("docs:read" | "docs:write")[],
     roles: (account?.roles ?? []) as ("admin" | "editor")[],
     meta: { plan: account?.plan === "pro" ? "pro" : "free" },

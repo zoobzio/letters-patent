@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  absent,
   at,
   container,
   each,
   field,
   filled,
   flag,
+  keyword,
   list,
+  literals,
   member,
   nest,
   numeric,
@@ -119,10 +122,10 @@ describe("list", () => {
 });
 
 describe("superset", () => {
-  const rule = superset("User", ["id", "meta"]);
+  const rule = superset("User", ["sub", "meta"]);
 
   it("passes containers carrying every required member", () => {
-    expect(rule({ id: "u", meta: {}, extra: true })).toBeUndefined();
+    expect(rule({ sub: "u", meta: {}, extra: true })).toBeUndefined();
   });
 
   it("yields to the container rule on non-containers", () => {
@@ -133,10 +136,10 @@ describe("superset", () => {
     expect(rule({})).toEqual(
       expect.objectContaining({
         code: "missing",
-        expected: ["id", "meta"],
+        expected: ["sub", "meta"],
       }),
     );
-    expect(rule({})?.message).toContain("id, meta");
+    expect(rule({})?.message).toContain("sub, meta");
   });
 });
 
@@ -146,6 +149,13 @@ describe("member", () => {
   it("passes declared members and yields on non-strings", () => {
     expect(rule("docs:read")).toBeUndefined();
     expect(rule(42)).toBeUndefined();
+  });
+
+  it("rules a numeric set by numbers", () => {
+    const tiers = member("Tier", new Set([1, 2]));
+    expect(tiers(2)).toBeUndefined();
+    expect(tiers("1")).toBeUndefined();
+    expect(tiers(3)?.code).toBe("not_member");
   });
 
   it("rejects undeclared members", () => {
@@ -205,10 +215,10 @@ describe("each", () => {
 });
 
 describe("at", () => {
-  const rule = at("id", [text("Identifier"), filled("Identifier")]);
+  const rule = at("sub", [text("Subject"), filled("Subject")]);
 
   it("runs the rules against the member", () => {
-    expect(rule({ id: "user-1" })).toBeUndefined();
+    expect(rule({ sub: "user-1" })).toBeUndefined();
   });
 
   it("yields on non-containers and absent members", () => {
@@ -217,11 +227,11 @@ describe("at", () => {
   });
 
   it("nests the member's first issue under its key", () => {
-    expect(rule({ id: 42 })).toEqual(
-      expect.objectContaining({ code: "not_string", path: ["id"] }),
+    expect(rule({ sub: 42 })).toEqual(
+      expect.objectContaining({ code: "not_string", path: ["sub"] }),
     );
-    expect(rule({ id: "" })).toEqual(
-      expect.objectContaining({ code: "empty", path: ["id"] }),
+    expect(rule({ sub: "" })).toEqual(
+      expect.objectContaining({ code: "empty", path: ["sub"] }),
     );
   });
 });
@@ -229,15 +239,23 @@ describe("at", () => {
 describe("spec", () => {
   const rule = spec("Meta field");
 
-  it("passes scalar keywords and literal enums", () => {
+  it("passes scalar keywords, literal enums, and choices", () => {
     expect(rule("string")).toBeUndefined();
     expect(rule("number?")).toBeUndefined();
+    expect(rule("string[]")).toBeUndefined();
+    expect(rule("number[]?")).toBeUndefined();
     expect(rule(["free", "pro"])).toBeUndefined();
+    expect(rule([1, 2, 3])).toBeUndefined();
+    expect(rule({ values: ["free", "pro"] })).toBeUndefined();
+    expect(rule({ values: [1, 2], optional: true })).toBeUndefined();
   });
 
   it("rejects unknown keywords and non-declarations", () => {
     expect(rule("text")?.code).toBe("not_field");
+    expect(rule("string[]?[]")?.code).toBe("not_field");
     expect(rule(42)?.code).toBe("not_field");
+    expect(rule({})?.code).toBe("not_field");
+    expect(rule(null)?.code).toBe("not_field");
   });
 
   it("rejects empty enums and malformed literals", () => {
@@ -245,9 +263,25 @@ describe("spec", () => {
     expect(rule(["free", 2])).toEqual(
       expect.objectContaining({ code: "not_string", path: [1] }),
     );
+    expect(rule([1, "2"])).toEqual(
+      expect.objectContaining({ code: "not_number", path: [1] }),
+    );
     expect(rule(["free", " "])).toEqual(
       expect.objectContaining({ code: "empty", path: [1] }),
     );
+  });
+
+  it("rules a choice's members", () => {
+    expect(rule({ values: [] })).toEqual(
+      expect.objectContaining({ code: "empty", path: ["values"] }),
+    );
+    expect(rule({ values: "free" })).toEqual(
+      expect.objectContaining({ code: "not_array", path: ["values"] }),
+    );
+    expect(rule({ values: ["free"], optional: "yes" })).toEqual(
+      expect.objectContaining({ code: "not_boolean", path: ["optional"] }),
+    );
+    expect(rule({ values: ["free"], extra: true })?.code).toBe("unknown");
   });
 });
 
@@ -267,11 +301,35 @@ describe("field", () => {
     expect(field("age", "number")(undefined)?.code).toBe("not_number");
   });
 
+  it("rules multi-valued keywords as lists", () => {
+    expect(field("tags", "string[]")(["a", "b"])).toBeUndefined();
+    expect(field("tags", "string[]")("a")?.code).toBe("not_array");
+    expect(field("tags", "string[]")(["a", 1])?.path).toEqual([1]);
+    expect(field("ids", "number[]?")(undefined)).toBeUndefined();
+    expect(field("ids", "number[]?")([1, "2"])?.code).toBe("not_number");
+  });
+
   it("rules enums by membership", () => {
     const rule = field("plan", ["free", "pro"]);
     expect(rule("pro")).toBeUndefined();
     expect(rule("gold")?.code).toBe("not_member");
     expect(rule(7)?.code).toBe("not_string");
+    expect(rule(undefined)?.code).toBe("not_string");
+
+    const tier = field("tier", [1, 2, 3]);
+    expect(tier(2)).toBeUndefined();
+    expect(tier(4)?.code).toBe("not_member");
+    expect(tier("2")?.code).toBe("not_number");
+  });
+
+  it("rules choices by membership, optional when marked", () => {
+    const required = field("plan", { values: ["free", "pro"] });
+    expect(required("free")).toBeUndefined();
+    expect(required(undefined)?.code).toBe("not_string");
+
+    const optional = field("plan", { values: ["free", "pro"], optional: true });
+    expect(optional(undefined)).toBeUndefined();
+    expect(optional("gold")?.code).toBe("not_member");
   });
 });
 
@@ -285,5 +343,28 @@ describe("optional", () => {
   it("applies the rules once a value is present", () => {
     expect(rules[0]?.("ada@example.com")).toBeUndefined();
     expect(rules[0]?.(42)?.code).toBe("not_string");
+  });
+});
+
+describe("declaration readers", () => {
+  it("reads the keyword of a scalar declaration", () => {
+    expect(keyword("string")).toBe("string");
+    expect(keyword("number[]?")).toBe("number[]");
+    expect(keyword("text")).toBeUndefined();
+    expect(keyword(["a"])).toBeUndefined();
+  });
+
+  it("reads whether a declaration is optional", () => {
+    expect(absent("string")).toBe(false);
+    expect(absent("string?")).toBe(true);
+    expect(absent(["a", "b"])).toBe(false);
+    expect(absent({ values: ["a"] })).toBe(false);
+    expect(absent({ values: ["a"], optional: true })).toBe(true);
+  });
+
+  it("reads the literals of an enum or choice", () => {
+    expect(literals("string")).toBeUndefined();
+    expect(literals(["a", "b"])).toEqual(["a", "b"]);
+    expect(literals({ values: [1, 2] })).toEqual([1, 2]);
   });
 });

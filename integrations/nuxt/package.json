@@ -34,6 +34,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@letters-patent/kit": "workspace:*",
     "@nuxt/kit": "catalog:",
     "letters-patent": "workspace:*",
     "h3": "catalog:"

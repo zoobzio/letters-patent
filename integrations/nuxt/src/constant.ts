@@ -16,3 +16,10 @@ export const DEFAULT_LOGIN = "/login";
 
 /** The `useState` key the auth service's state is held under. */
 export const STATE_KEY = "letters-patent:user";
+
+/**
+ * The directory under the Nuxt build directory the contract modules are
+ * written to: `#build/letters-patent/config.mjs` and its siblings — the
+ * same modules `patent build` writes.
+ */
+export const MODULES = "letters-patent";

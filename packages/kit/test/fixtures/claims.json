@@ -1,0 +1,19 @@
+{
+  "id_token": {
+    "email": { "essential": true },
+    "email_verified": null,
+    "name": null,
+    "picture": null,
+    "roles": { "essential": true, "values": ["admin", "editor"] },
+    "groups": { "values": ["eng", "sales"] },
+    "entitlements": { "values": ["beta"] },
+    "plan": { "essential": true, "values": ["free", "pro"] },
+    "org": { "essential": true },
+    "seat": { "value": 1 },
+    "locale": null
+  },
+  "userinfo": {
+    "name": { "essential": true },
+    "tags": null
+  }
+}

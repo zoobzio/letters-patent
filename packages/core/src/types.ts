@@ -1,4 +1,12 @@
-import type { Contract, Meta, Role, Scope, User } from "@letters-patent/schema";
+import type {
+  Contract,
+  Entitlement,
+  Group,
+  Meta,
+  Role,
+  Scope,
+  User,
+} from "@letters-patent/schema";
 
 /** Events the service emits. Subscribe with {@link Patent.on}. */
 export interface Events<C extends Contract> {
@@ -23,13 +31,13 @@ export interface Events<C extends Contract> {
 
   /**
    * An authorization check failed. `check` says which kind: a `can()` scope
-   * check (the user was missing at least one) or an `is()` role check (the
-   * user held none of them). `required` is what was asked; `user` is `null`
-   * when unauthenticated.
+   * check (the user was missing at least one), or an `is()` role, `in()`
+   * group, or `has()` entitlement check (the user held none of them).
+   * `required` is what was asked; `user` is `null` when unauthenticated.
    */
   denied: {
-    check: "scope" | "role";
-    required: Scope<C>[] | Role<C>[];
+    check: "scope" | "role" | "group" | "entitlement";
+    required: Scope<C>[] | Role<C>[] | Group<C>[] | Entitlement<C>[];
     user: User<Meta<C>> | null;
   };
 }
@@ -49,7 +57,7 @@ export interface Patent<C extends Contract> {
   readonly authenticated: boolean;
 
   /**
-   * Whether the current session's `expires` has passed. The patent only
+   * Whether the current session's `exp` has passed. The patent only
    * reports staleness — reacting to it (via `refresh` or `logout`) is the
    * consumer's call.
    */
@@ -68,6 +76,21 @@ export interface Patent<C extends Contract> {
    * fails to compile. Emits `denied` when the answer is no.
    */
   is(...roles: Role<C>[]): boolean;
+
+  /**
+   * Whether the current user belongs to any of the given groups
+   * (disjunctive — any one suffices). Groups are the contract's own — an
+   * undeclared group fails to compile. Emits `denied` when the answer is no.
+   */
+  in(...groups: Group<C>[]): boolean;
+
+  /**
+   * Whether the current user holds any of the given entitlements
+   * (disjunctive — any one suffices). Entitlements are the contract's own —
+   * an undeclared entitlement fails to compile. Emits `denied` when the
+   * answer is no.
+   */
+  has(...entitlements: Entitlement<C>[]): boolean;
 
   /**
    * Establish the current user from ambient context via the provider. The

@@ -21,12 +21,28 @@ export const defineParse = <C extends Contract>(
       assert.role(v);
       return v;
     },
+    group: (v: unknown) => {
+      assert.group(v);
+      return v;
+    },
+    entitlement: (v: unknown) => {
+      assert.entitlement(v);
+      return v;
+    },
     scopes: (v: unknown) => {
       assert.scopes(v);
       return v;
     },
     roles: (v: unknown) => {
       assert.roles(v);
+      return v;
+    },
+    groups: (v: unknown) => {
+      assert.groups(v);
+      return v;
+    },
+    entitlements: (v: unknown) => {
+      assert.entitlements(v);
       return v;
     },
     meta: (v: unknown) => {

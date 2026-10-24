@@ -1,22 +1,48 @@
 /**
- * A meta field declaration: a scalar keyword (`?`-suffixed when the field is
- * optional) or an enum of string literals the field must be drawn from.
+ * The scalar keywords a meta field may be declared with. The `[]`-suffixed
+ * forms declare a multi-valued claim.
  */
-export type Field =
-  | "string"
-  | "string?"
-  | "number"
-  | "number?"
-  | "boolean"
-  | "boolean?"
-  | readonly string[];
+export type Keyword = "string" | "number" | "boolean" | "string[]" | "number[]";
+
+/**
+ * The `?`-suffixed keywords — the field declarations whose members may be
+ * absent.
+ */
+export type Optional = `${Keyword}?`;
+
+/**
+ * The literals an enum field must be drawn from: all strings or all
+ * numbers. On its own, the compact form of a required enum field.
+ */
+export type Literals = readonly string[] | readonly number[];
+
+/**
+ * The long form of an enum field: the literals, and whether the member may
+ * be absent. This is what an OpenID Connect claims request lowers to — its
+ * `values` with `essential: false`.
+ */
+export interface Choice {
+  values: Literals;
+  optional?: boolean;
+}
+
+/**
+ * A meta field declaration: a scalar keyword (`?`-suffixed when the field is
+ * optional), an enum of literals, or a {@link Choice}.
+ */
+export type Field = Keyword | Optional | Literals | Choice;
 
 /**
  * The static, serializable configuration a schema is derived from: which
- * scopes and roles exist, and how the consumer-defined meta is constructed.
- * The contract is plain data — it can be written to a build template or sent
- * over a wire — and it carries the vocabulary in its types: `Scope`, `Role`,
- * and `Meta` are all read off the contract by inference.
+ * scopes, roles, groups, and entitlements exist, and how the consumer-defined
+ * meta is constructed. The contract is plain data — a build writes it, a
+ * wire carries it — and it carries the vocabulary in its types: `Scope`,
+ * `Role`, `Group`, `Entitlement`, and `Meta` are all read off the contract
+ * by inference.
+ *
+ * The four vocabularies are the authorization claims of RFC 9068 §2.2.3.1:
+ * `scope` from OAuth 2.0, and `roles`, `groups`, and `entitlements` from
+ * the SCIM core schema (RFC 7643 §4.1.2).
  */
 export interface Contract {
   /**
@@ -29,6 +55,16 @@ export interface Contract {
    * The role vocabulary — coarse-grained authorization, a peer of scopes.
    */
   roles: readonly string[];
+
+  /**
+   * The group vocabulary — the collections a user belongs to.
+   */
+  groups: readonly string[];
+
+  /**
+   * The entitlement vocabulary — what a user has been granted beyond roles.
+   */
+  entitlements: readonly string[];
 
   /**
    * The meta construction: one {@link Field} declaration per consumer-defined
@@ -49,6 +85,16 @@ export type Scope<C extends Contract> = C["scopes"][number];
 export type Role<C extends Contract> = C["roles"][number];
 
 /**
+ * A group name declared by the contract.
+ */
+export type Group<C extends Contract> = C["groups"][number];
+
+/**
+ * An entitlement name declared by the contract.
+ */
+export type Entitlement<C extends Contract> = C["entitlements"][number];
+
+/**
  * The value type a single {@link Field} declaration admits.
  */
 export type Scalar<F extends Field> = F extends "string" | "string?"
@@ -57,28 +103,38 @@ export type Scalar<F extends Field> = F extends "string" | "string?"
     ? number
     : F extends "boolean" | "boolean?"
       ? boolean
-      : F extends readonly string[]
-        ? F[number]
-        : never;
+      : F extends "string[]" | "string[]?"
+        ? string[]
+        : F extends "number[]" | "number[]?"
+          ? number[]
+          : F extends Choice
+            ? F["values"][number]
+            : F extends Literals
+              ? F[number]
+              : never;
 
 /**
- * The `?`-suffixed keywords — the field declarations whose members may be
- * absent.
+ * Whether a {@link Field} declaration admits an absent member: a
+ * `?`-suffixed keyword, or a {@link Choice} marked optional.
  */
-export type Optional = "string?" | "number?" | "boolean?";
+export type Absent<F extends Field> = F extends Optional
+  ? true
+  : F extends { optional: true }
+    ? true
+    : false;
 
 /**
  * The meta type a contract constructs: required members from plain fields,
- * optional members from `?`-suffixed ones, enum arrays narrowed to their
- * literal union.
+ * optional members from `?`-suffixed keywords and optional choices, enums
+ * narrowed to their literal union.
  */
 export type Meta<C extends Contract> = {
   -readonly [
-    K in keyof C["meta"] as C["meta"][K] extends Optional ? never : K
+    K in keyof C["meta"] as Absent<C["meta"][K]> extends true ? never : K
   ]: Scalar<C["meta"][K]>;
 } & {
   -readonly [
-    K in keyof C["meta"] as C["meta"][K] extends Optional ? K : never
+    K in keyof C["meta"] as Absent<C["meta"][K]> extends true ? K : never
   ]?: Scalar<C["meta"][K]>;
 };
 
@@ -129,8 +185,12 @@ export interface Domain<C extends Contract> {
   contract: Contract;
   scope: Scope<C>;
   role: Role<C>;
+  group: Group<C>;
+  entitlement: Entitlement<C>;
   scopes: Scope<C>[];
   roles: Role<C>[];
+  groups: Group<C>[];
+  entitlements: Entitlement<C>[];
   meta: Meta<C>;
   user: User<Meta<C>>;
 }
@@ -160,6 +220,8 @@ export type Result<V> =
 export interface Enum<C extends Contract> {
   scopes: Set<Scope<C>>;
   roles: Set<Role<C>>;
+  groups: Set<Group<C>>;
+  entitlements: Set<Entitlement<C>>;
   meta: Set<string>;
 }
 
@@ -178,8 +240,12 @@ export interface Assert<C extends Contract> {
   contract(value: unknown): asserts value is Contract;
   scope(value: unknown): asserts value is Scope<C>;
   role(value: unknown): asserts value is Role<C>;
+  group(value: unknown): asserts value is Group<C>;
+  entitlement(value: unknown): asserts value is Entitlement<C>;
   scopes(value: unknown): asserts value is Scope<C>[];
   roles(value: unknown): asserts value is Role<C>[];
+  groups(value: unknown): asserts value is Group<C>[];
+  entitlements(value: unknown): asserts value is Entitlement<C>[];
   meta(value: unknown): asserts value is Meta<C>;
   user(value: unknown): asserts value is User<Meta<C>>;
 }
@@ -217,14 +283,19 @@ export interface Schema<C extends Contract> {
 }
 
 /**
- * The fixed top-level shape every letters-patent user satisfies. `Meta` is the
+ * The fixed top-level shape every letters-patent user satisfies: the JWT
+ * access token profile of RFC 9068 — `sub`, `iat`, `exp`, and the
+ * authorization claims — with the OpenID Connect standard claims a session
+ * commonly carries. Member names are the registered claim names, so a token
+ * or an ID token's claims map onto a user without renaming. `Meta` is the
  * consumer-defined portion, typed per service instance.
  */
 export interface User<Meta> {
   /**
-   * Stable unique identifier, as issued by the authentication provider.
+   * Subject: the stable unique identifier, as issued by the authentication
+   * provider.
    */
-  id: string;
+  sub: string;
 
   /**
    * Email address, when the provider supplies one.
@@ -232,44 +303,58 @@ export interface User<Meta> {
   email?: string;
 
   /**
+   * Whether the provider has verified the email address.
+   */
+  email_verified?: boolean;
+
+  /**
    * Human-readable display name, when the provider supplies one.
    */
   name?: string;
 
   /**
-   * User name selected by the user.
+   * Shorthand name the user goes by at the provider.
    */
-  username?: string;
-
-  avatar?: string;
+  preferred_username?: string;
 
   /**
-   * Account status as reported by the provider (e.g. "active",
-   * "suspended").
+   * URL of the user's profile picture.
    */
-  status?: string;
+  picture?: string;
+
+  /**
+   * Issued at: epoch seconds the session was established.
+   */
+  iat?: number;
+
+  /**
+   * Expiration: epoch seconds after which the session is considered stale.
+   * letters-patent never acts on staleness itself; it only reports it.
+   */
+  exp?: number;
 
   /**
    * Granted scopes — the fine-grained authorization surface `can()` checks
-   * against. Effective for the context the user was resolved in.
+   * against. Effective for the context the user was resolved in. Absent
+   * reads as none.
    */
-  scopes: string[];
+  scopes?: string[];
 
   /**
-   * Assigned roles — coarse-grained authorization, a peer of scopes.
-   * Effective for the context the user was resolved in.
+   * Assigned roles — coarse-grained authorization, a peer of scopes. Absent
+   * reads as none.
    */
-  roles: string[];
-
-  issued?: number;
+  roles?: string[];
 
   /**
-   * Epoch-milliseconds timestamp after which the session is considered
-   * stale. letters-patent never acts on staleness itself; it only reports it.
+   * Group memberships. Absent reads as none.
    */
-  expires?: number;
+  groups?: string[];
 
-  verified?: boolean;
+  /**
+   * Granted entitlements. Absent reads as none.
+   */
+  entitlements?: string[];
 
   /**
    * Consumer-defined fields.

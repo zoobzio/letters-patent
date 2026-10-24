@@ -7,6 +7,8 @@ import { defineProvider } from "../src/index";
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
   roles: ["editor"],
+  groups: [],
+  entitlements: [],
   meta: { plan: ["free", "pro"] },
 });
 
@@ -52,7 +54,7 @@ const createFakeProvider = defineProvider<FakeOptions, FakeSession>(
 );
 
 const ada: User<Meta<C>> = {
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read", "docs:write"],
   roles: ["editor"],
   meta: { plan: "pro" },
@@ -63,7 +65,7 @@ describe("defineProvider", () => {
     // No explicit generic, no bridge annotation: C infers from the schema
     // and the bridge is contextually typed against it.
     const provider = createFakeProvider(schema, { session }, (payload) => ({
-      id: payload.sub,
+      sub: payload.sub,
       scopes: payload.grants,
       roles: payload.groups,
       meta: { plan: payload.plan === "pro" ? "pro" : "free" },
@@ -77,7 +79,7 @@ describe("defineProvider", () => {
 
   it("rejects a bridge outside the contract at compile time", () => {
     const provider = createFakeProvider(schema, { session }, (payload) => ({
-      id: payload.sub,
+      sub: payload.sub,
       scopes: payload.grants,
       roles: payload.groups,
       // @ts-expect-error — a mis-mapped meta fails to compile
@@ -90,7 +92,7 @@ describe("defineProvider", () => {
   it("threads options and bridge into the callbacks", async () => {
     const state: State<C> = { current: null };
     const bridge = (payload: FakeSession) => ({
-      id: payload.sub,
+      sub: payload.sub,
       scopes: payload.grants,
       roles: payload.groups,
       meta: {
@@ -114,7 +116,7 @@ describe("defineProvider", () => {
       schema,
       { session: forged },
       (payload) => ({
-        id: payload.sub,
+        sub: payload.sub,
         scopes: payload.grants,
         roles: payload.groups,
         meta: { plan: "pro" },
@@ -137,7 +139,7 @@ describe("defineProvider", () => {
       async (payload) => {
         const record = await lookup(payload.sub);
         return {
-          id: payload.sub,
+          sub: payload.sub,
           scopes: record.scopes,
           roles: record.roles,
           meta: { plan: "free" },
@@ -147,7 +149,7 @@ describe("defineProvider", () => {
 
     await provider.resolve(state, schema);
     expect(state.current).toEqual({
-      id: "user-1",
+      sub: "user-1",
       scopes: ["docs:read"],
       roles: [],
       meta: { plan: "free" },
@@ -160,7 +162,7 @@ describe("defineProvider", () => {
       schema,
       { session: null },
       (payload) => ({
-        id: payload.sub,
+        sub: payload.sub,
         scopes: payload.grants,
         roles: payload.groups,
         meta: { plan: "free" },

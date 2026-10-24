@@ -1,0 +1,7 @@
+{
+  "resource": "https://acme.example",
+  "authorization_servers": ["https://accounts.google.com"],
+  "scopes_supported": ["docs:read", "docs:write", "billing:manage"],
+  "bearer_methods_supported": ["header"],
+  "resource_documentation": "https://acme.example/docs/api"
+}

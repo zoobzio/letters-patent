@@ -1,5 +1,5 @@
 import type { Patent, Events } from "./types";
-import type { Contract, Schema } from "@letters-patent/schema";
+import type { Contract, Meta, Schema, User } from "@letters-patent/schema";
 import type { Provider, State } from "@letters-patent/sdk";
 
 import { defineState } from "@letters-patent/sdk";
@@ -47,6 +47,30 @@ export const definePatent = <C extends Contract>(
     emit("change", state.current);
   });
 
+  /**
+   * A disjunctive check over one of the user's grant lists: any listed
+   * member suffices. An absent list reads as none. Emits `denied` with the
+   * kind when the answer is no.
+   */
+  const any = <Member extends string>(
+    check: Events<C>["denied"]["check"],
+    held: (user: User<Meta<C>>) => string[] | undefined,
+    required: Member[],
+  ): boolean => {
+    const user = state.current;
+    const granted =
+      user !== null &&
+      required.some((member) => (held(user) ?? []).includes(member));
+    if (!granted) {
+      emit("denied", {
+        check,
+        required: required as Events<C>["denied"]["required"],
+        user,
+      });
+    }
+    return granted;
+  };
+
   return {
     get current() {
       return state.current;
@@ -56,23 +80,26 @@ export const definePatent = <C extends Contract>(
     },
     get stale() {
       return (
-        state.current?.expires !== undefined &&
-        state.current.expires <= Date.now()
+        state.current?.exp !== undefined &&
+        state.current.exp * 1000 <= Date.now()
       );
     },
     can(...scopes) {
       const user = state.current;
       const granted =
-        user !== null && scopes.every((scope) => user.scopes.includes(scope));
+        user !== null &&
+        scopes.every((scope) => (user.scopes ?? []).includes(scope));
       if (!granted) emit("denied", { check: "scope", required: scopes, user });
       return granted;
     },
     is(...roles) {
-      const user = state.current;
-      const granted =
-        user !== null && roles.some((role) => user.roles.includes(role));
-      if (!granted) emit("denied", { check: "role", required: roles, user });
-      return granted;
+      return any("role", (user) => user.roles, roles);
+    },
+    in(...groups) {
+      return any("group", (user) => user.groups, groups);
+    },
+    has(...entitlements) {
+      return any("entitlement", (user) => user.entitlements, entitlements);
     },
     async resolve() {
       await provider.resolve(state, schema);

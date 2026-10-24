@@ -6,3 +6,6 @@ dist
 .idea
 .claude
 .turbo
+.generated
+.nuxt
+.output

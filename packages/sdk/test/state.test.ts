@@ -6,13 +6,15 @@ import { defineState } from "../src/index";
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write"],
   roles: ["editor"],
+  groups: [],
+  entitlements: [],
   meta: { plan: ["free", "pro"] },
 });
 
 type C = (typeof schema)["base"];
 
 const ada = (): User<Meta<C>> => ({
-  id: "user-1",
+  sub: "user-1",
   scopes: ["docs:read"],
   roles: ["editor"],
   meta: { plan: "pro" },
@@ -69,11 +71,11 @@ describe("defineState", () => {
     const target: { current: User<Meta<C>> | null } = { current: ada() };
     const state = defineState(schema, target);
 
-    state.current!.scopes.push("docs:write");
+    state.current!.scopes!.push("docs:write");
     expect(target.current?.scopes).toEqual(["docs:read", "docs:write"]);
 
     expect(() => {
-      state.current!.scopes.push("docs:admin" as never);
+      state.current!.scopes!.push("docs:admin" as never);
     }).toThrow(SchemaError);
     expect(target.current?.scopes).toEqual(["docs:read", "docs:write"]);
   });
@@ -87,9 +89,9 @@ describe("defineState", () => {
     expect(target.current?.email).toBeUndefined();
 
     expect(() => {
-      delete (state.current as unknown as Record<string, unknown>).id;
+      delete (state.current as unknown as Record<string, unknown>).sub;
     }).toThrow(SchemaError);
-    expect(target.current?.id).toBe("user-1");
+    expect(target.current?.sub).toBe("user-1");
   });
 
   it("returns a stable wrapper across reads", () => {

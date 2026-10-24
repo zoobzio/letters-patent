@@ -11,7 +11,8 @@ The umbrella package — the only thing consumers and integrations install.
   from [`@letters-patent/sdk`](../sdk).
 - **`letters-patent/config`**: the declaration surface — `defineLettersPatentConfig`,
   an identity helper that pins a contract's literals without `as const`, for
-  the one shared file the contract is declared in.
+  an app that declares its contract inline rather than building it with
+  [`@letters-patent/kit`](../kit).
 
 ```ts
 import { definePatent, defineSchema } from "letters-patent";
