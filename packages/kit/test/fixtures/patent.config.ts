@@ -4,8 +4,8 @@ export default defineConfig({
   resource: "./resource.json",
   claims: "./claims.json",
   issuers: { google: "./issuers/google.json" },
-  openapi: "./openapi.json",
   describe: {
+    scopes: { "docs:read": "Read documents" },
     roles: { admin: "Full control" },
     claims: { plan: "The billing plan" },
   },

@@ -37,8 +37,10 @@ const config = defineConfig({
   resource: "./resource.json",
   claims: "./claims.json",
   issuers: { google: "./issuers/google.json" },
-  openapi: "./openapi.json",
-  describe: { roles: { admin: "Full control" } },
+  describe: {
+    scopes: { "docs:read": "Read documents" },
+    roles: { admin: "Full control" },
+  },
   types: { seat: "number", tags: "string[]" },
 });
 
@@ -65,7 +67,6 @@ describe("resolveKit", () => {
     expect(kit.documents.map((path) => path.slice(ROOT.length))).toEqual([
       "resource.json",
       "claims.json",
-      "openapi.json",
       "issuers/google.json",
     ]);
     expect(kit.warnings).toEqual([

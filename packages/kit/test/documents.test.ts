@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { parseClaims } from "../src/claims";
 import { parseDiscovery } from "../src/discovery";
 import { InvalidDocumentError } from "../src/error";
-import { parseOpenApi } from "../src/openapi";
 import { parseResource } from "../src/resource";
 
 const FIXTURES = new URL("./fixtures/", import.meta.url);
@@ -220,29 +219,5 @@ describe("parseDiscovery", () => {
         "a",
       ),
     ).toThrow(/scopes_supported: must be an array/);
-  });
-});
-
-describe("parseOpenApi", () => {
-  it("reads the scope descriptions out of the oauth2 schemes", async () => {
-    expect(parseOpenApi(await fixture("openapi.json"), "openapi")).toEqual({
-      "docs:read": "Read documents",
-      "docs:write": "Create and edit documents",
-    });
-  });
-
-  it("reads a Swagger 2 document too, and tolerates no schemes", () => {
-    expect(
-      parseOpenApi(
-        {
-          securityDefinitions: {
-            oauth: { type: "oauth2", scopes: { a: "A" } },
-          },
-        },
-        "s",
-      ),
-    ).toEqual({ a: "A" });
-    expect(parseOpenApi({ openapi: "3.1.0" }, "s")).toEqual({});
-    expect(() => parseOpenApi("nope", "s")).toThrow(InvalidDocumentError);
   });
 });

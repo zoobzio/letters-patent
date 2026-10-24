@@ -12,8 +12,8 @@ Build the contract from the standards, and shape the user after them.
 
 - `@letters-patent/kit` (new): `patent build` reads an app's OAuth 2.0
   Protected Resource Metadata (RFC 9728), an OpenID Connect claims request
-  (Core §5.5), each issuer's discovery document (RFC 8414), and optionally
-  an OpenAPI document, assembles and proves the contract, and writes the
+  (Core §5.5), and each issuer's discovery document (RFC 8414), assembles and
+  proves the contract, and writes the
   typed modules the runtime consumes: the vocabulary unions and guards, the
   contract and its `Contract` type, a manifest, one module per issuer with
   its endpoints, capabilities, and `Claims` type, and `resource.json` ready

@@ -7,7 +7,6 @@ export * from "./discovery";
 export * from "./emit";
 export * from "./error";
 export * from "./load";
-export * from "./openapi";
 export * from "./resolve";
 export * from "./resource";
 export * from "./standard";

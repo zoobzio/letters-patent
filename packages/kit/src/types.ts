@@ -7,8 +7,7 @@ import type { Contract, Field, Keyword } from "@letters-patent/schema";
 export type Source = string | URL;
 
 /**
- * Descriptions for the manifest, keyed by member id. A description here
- * wins over one read from an OpenAPI document.
+ * Descriptions for the manifest, keyed by member id.
  */
 export interface Describe {
   scopes?: Record<string, string>;
@@ -54,15 +53,9 @@ export interface KitConfig {
   issuers?: Record<string, Source>;
 
   /**
-   * An OpenAPI document whose `oauth2` security schemes describe the scopes.
-   * The scope descriptions reach the manifest. RFC 9728 lists scopes but
-   * carries no text for them.
-   */
-  openapi?: Source;
-
-  /**
-   * Descriptions for the manifest, by member id. These win over the OpenAPI
-   * document.
+   * Descriptions for the manifest, by member id. The standards carry none:
+   * RFC 9728 lists scopes with no text, and a claims request names claims
+   * with no text.
    */
   describe?: Describe;
 

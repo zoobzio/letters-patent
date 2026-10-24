@@ -18,7 +18,6 @@ export default defineNuxtConfig({
 | ------------------------- | ----------------------------- | ---------------------------------------------------------- |
 | `src/resource.json`       | RFC 9728                      | `docs:read`, `docs:write`, `billing:manage`                |
 | `src/claims.json`         | OIDC Core §5.5 claims request | roles, groups, entitlements, `plan`, `workspace`, `locale` |
-| `src/openapi.json`        | OpenAPI `oauth2` scheme       | scope descriptions                                         |
 | `src/issuers/google.json` | OIDC Discovery, vendored      | Google's endpoints and capabilities                        |
 
 ```sh

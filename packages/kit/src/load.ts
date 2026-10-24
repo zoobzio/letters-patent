@@ -35,11 +35,8 @@ export const validate = (config: KitConfig): void => {
   if (!isSource(config.resource)) {
     throw new InvalidConfigError("resource", "resource must be a path or URL");
   }
-  for (const member of ["claims", "openapi"] as const) {
-    const source = config[member];
-    if (source !== undefined && !isSource(source)) {
-      throw new InvalidConfigError(member, `${member} must be a path or URL`);
-    }
+  if (config.claims !== undefined && !isSource(config.claims)) {
+    throw new InvalidConfigError("claims", "claims must be a path or URL");
   }
   if (config.issuers !== undefined) {
     if (!record(config.issuers)) {

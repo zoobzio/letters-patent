@@ -4,17 +4,20 @@ import { defineConfig } from "@letters-patent/kit";
  * The build of the Acme contract. The app is an OAuth 2.0 protected
  * resource: `resource.json` is its metadata (RFC 9728) and names its
  * scopes; the claims request names what the app requires of a user and its
- * `roles`, `groups`, and `entitlements` vocabularies; the OpenAPI document
- * describes the scopes; Google is the issuer, from a vendored discovery
- * document. The build writes to `.dist/`, and the package exports the
+ * `roles`, `groups`, and `entitlements` vocabularies; Google is the issuer,
+ * from a vendored discovery document. The build writes to `.dist/`, and the package exports the
  * modules, so an app names this package as its preset.
  */
 export default defineConfig({
   resource: "./src/resource.json",
   claims: "./src/claims.json",
   issuers: { google: "./src/issuers/google.json" },
-  openapi: "./src/openapi.json",
   describe: {
+    scopes: {
+      "docs:read": "Read documents",
+      "docs:write": "Create and edit documents",
+      "billing:manage": "Change the plan and payment method",
+    },
     roles: {
       admin: "Full control of the workspace",
       editor: "Edit documents",

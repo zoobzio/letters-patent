@@ -2,14 +2,13 @@
 
 The kit reads the standard documents an app already has for its
 authorization story and writes the modules the letters-patent runtime needs.
-The input is three kinds of document; a `patent.config.ts` points at them.
+The input is three documents; a `patent.config.ts` points at them.
 
-| Document           | Standard                                        | What it gives the contract                                                       |
-| ------------------ | ----------------------------------------------- | -------------------------------------------------------------------------------- |
-| `resource.json`    | OAuth 2.0 Protected Resource Metadata, RFC 9728 | `scopes_supported` → the scope vocabulary                                        |
-| `claims.json`      | OpenID Connect claims request, Core §5.5        | `roles`/`groups`/`entitlements` → vocabularies; every other claim → a meta field |
-| issuer discovery   | OpenID Connect Discovery / RFC 8414             | endpoints and capabilities, per issuer                                           |
-| OpenAPI (optional) | `oauth2` security schemes                       | scope descriptions for the manifest                                              |
+| Document         | Standard                                        | What it gives the contract                                                       |
+| ---------------- | ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| `resource.json`  | OAuth 2.0 Protected Resource Metadata, RFC 9728 | `scopes_supported` → the scope vocabulary                                        |
+| `claims.json`    | OpenID Connect claims request, Core §5.5        | `roles`/`groups`/`entitlements` → vocabularies; every other claim → a meta field |
+| issuer discovery | OpenID Connect Discovery / RFC 8414             | endpoints and capabilities, per issuer                                           |
 
 The user shape the contract rules is the JWT access token profile of RFC 9068:
 `sub`, `iat`, `exp`, `scope`, and the `roles`, `groups`, and `entitlements`
@@ -23,7 +22,7 @@ export default defineConfig({
   resource: "./auth/resource.json",
   claims: "./auth/claims.json",
   issuers: { google: "https://accounts.google.com" }, // or a vendored discovery.json
-  openapi: "./auth/openapi.json",
+  describe: { scopes: { "docs:write": "Create and edit documents" } },
 });
 ```
 
@@ -78,7 +77,9 @@ The build writes to `patent/` (the `outDir` option):
   types with every literal. `defineSchema<Contract>(config.contract)` types
   the service.
 - **`manifest`** — each vocabulary member and requested claim with an id, a
-  name, and a description, for a consent screen or an admin console.
+  titled name, and the description `describe` gives it, for a consent screen
+  or an admin console. The standards carry no text for these, so the config
+  is where it lives.
 - **`issuers/<id>`** — one module per issuer: its endpoints (`authorize`,
   `token`, `jwks`, `userinfo`, `revoke`, `endSession`, `introspect`, as
   published), its capabilities as literal booleans (`code`, `pkce`,
@@ -132,6 +133,5 @@ name. It warns, and goes on, about what the documents cannot settle:
 - `emit(core)` turns a contract — with or without a resource and issuers —
   into the files. `@letters-patent/nuxt` emits the same modules the CLI
   writes.
-- `parseResource`, `parseClaims`, `parseDiscovery`, `parseOpenApi` read one
-  document each; `assemble` builds and proves the contract; `verify`
+- `parseResource`, `parseClaims`, `parseDiscovery` read one document each; `assemble` builds and proves the contract; `verify`
   cross-checks the documents.

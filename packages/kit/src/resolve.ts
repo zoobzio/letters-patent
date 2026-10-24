@@ -12,15 +12,14 @@ import { describe } from "./describe";
 import { parseDiscovery } from "./discovery";
 import { InvalidDocumentError } from "./error";
 import { validate } from "./load";
-import { parseOpenApi } from "./openapi";
 import { parseResource } from "./resource";
 import { loader, locate, locateIssuer, normalize } from "./source";
 import { verify } from "./verify";
 
 /**
  * Validates a config and resolves it into a {@link Kit}. This is the only
- * step that reads documents: the resource document, the claims request, the
- * OpenAPI document, and each issuer's discovery document. It assembles and
+ * step that reads documents: the resource document, the claims request, and
+ * each issuer's discovery document. It assembles and
  * proves the contract, describes it, and verifies the documents against
  * each other. {@link generate} turns the result into files.
  *
@@ -63,12 +62,6 @@ export const resolveKit = async (
     claims = parseClaims(claimsDoc.doc, claimsDoc.origin, config.types);
   }
 
-  let scopes: Record<string, string> = {};
-  if (config.openapi !== undefined) {
-    const openapiDoc = await read(at(config.openapi));
-    scopes = parseOpenApi(openapiDoc.doc, openapiDoc.origin);
-  }
-
   const issuers: Issuer[] = [];
   for (const [id, source] of entries(config.issuers ?? {})) {
     const issuerDoc = await read(locateIssuer(source, base));
@@ -76,7 +69,7 @@ export const resolveKit = async (
   }
 
   const { contract } = assemble(resource, claims);
-  const manifest = describe(contract, claims, config.describe, scopes);
+  const manifest = describe(contract, claims, config.describe);
   const warnings = verify(resource, claims, issuers);
 
   return {

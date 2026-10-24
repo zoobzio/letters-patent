@@ -96,12 +96,10 @@ describe("lower", () => {
 describe("describe", () => {
   it("describes the contract with titled names and the given descriptions", () => {
     const { contract } = assemble(resource, claims);
-    const described = manifest(
-      contract,
-      claims,
-      { roles: { admin: "Full control" } },
-      { "docs:read": "Read documents" },
-    );
+    const described = manifest(contract, claims, {
+      scopes: { "docs:read": "Read documents" },
+      roles: { admin: "Full control" },
+    });
     expect(described.scopes).toEqual([
       { id: "docs:read", name: "Docs Read", description: "Read documents" },
       { id: "docs:write", name: "Docs Write" },
