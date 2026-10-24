@@ -1,5 +1,14 @@
 # @letters-patent/kit
 
+## 0.0.4
+
+### Patch Changes
+
+- [`bc81342`](https://github.com/zoobzio/letters-patent/commit/bc8134232d7d29058901ce5bf28e9b896faf1bc4) Thanks [@zoobzio](https://github.com/zoobzio)! - Republish all packages after the failed 0.0.3 npm release.
+
+- Updated dependencies [[`bc81342`](https://github.com/zoobzio/letters-patent/commit/bc8134232d7d29058901ce5bf28e9b896faf1bc4)]:
+  - @letters-patent/schema@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes
