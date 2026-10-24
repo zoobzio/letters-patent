@@ -1,5 +1,16 @@
 # letters-patent
 
+## 0.0.3
+
+### Patch Changes
+
+- [`3b9e823`](https://github.com/zoobzio/letters-patent/commit/3b9e823e34b81d298bea546b1d55ca21e04191a9) Thanks [@zoobzio](https://github.com/zoobzio)! - Republish all packages after the failed 0.0.2 npm release.
+
+- Updated dependencies [[`3b9e823`](https://github.com/zoobzio/letters-patent/commit/3b9e823e34b81d298bea546b1d55ca21e04191a9)]:
+  - @letters-patent/core@0.0.3
+  - @letters-patent/sdk@0.0.3
+  - @letters-patent/schema@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
