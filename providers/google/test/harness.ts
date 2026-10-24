@@ -1,9 +1,9 @@
 import type { FakeGoogle } from "./google";
-import type { Bridge } from "letters-patent/kit";
+import type { Bridge } from "letters-patent/sdk";
 import type { GoogleClaims, GoogleOptions } from "../src/types";
 
 import { defineSchema } from "letters-patent";
-import { defineState } from "letters-patent/kit";
+import { defineState } from "letters-patent/sdk";
 import {
   createApp,
   createRouter,

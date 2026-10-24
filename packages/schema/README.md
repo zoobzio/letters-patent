@@ -72,7 +72,7 @@ to the failing member (`meta.plan: plan is not declared by the contract.`).
 ## Types
 
 - `User<Meta>` — the fixed user shape. (The `Provider` interaction contract
-  lives in [`@letters-patent/kit`](../kit).)
+  lives in [`@letters-patent/sdk`](../sdk).)
 - `Contract` / `Field` — the static configuration and one meta field
   declaration.
 - `Scope<C>` / `Role<C>` / `Meta<C>` — the vocabulary types derived from a

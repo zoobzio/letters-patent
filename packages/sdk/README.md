@@ -1,6 +1,6 @@
-# @letters-patent/kit
+# @letters-patent/sdk
 
-The provider-authoring toolkit. This package owns the `Provider<C>`
+The provider-authoring SDK. This package owns the `Provider<C>`
 interaction contract, the `Bridge` between a vendor's payloads and an app's
 contract, and `defineProvider` — the entry point published integrations
 (`@letters-patent/auth0`, …) and homegrown providers share.

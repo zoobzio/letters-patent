@@ -1,5 +1,5 @@
 import type { Contract, Schema } from "letters-patent";
-import type { Provider, Redirect } from "letters-patent/kit";
+import type { Provider, Redirect } from "letters-patent/sdk";
 
 import { useRequestFetch } from "#imports";
 

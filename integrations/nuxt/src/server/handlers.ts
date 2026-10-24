@@ -1,8 +1,8 @@
 import type { Contract, Schema } from "letters-patent";
-import type { Provider, Redirect } from "letters-patent/kit";
+import type { Provider, Redirect } from "letters-patent/sdk";
 import type { EventHandler, H3Event } from "h3";
 
-import { defineState } from "letters-patent/kit";
+import { defineState } from "letters-patent/sdk";
 import {
   createError,
   defineEventHandler,

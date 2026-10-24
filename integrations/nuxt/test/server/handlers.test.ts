@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Meta, User } from "letters-patent";
-import type { Provider } from "letters-patent/kit";
+import type { Provider } from "letters-patent/sdk";
 import type { H3Event } from "h3";
 import { SchemaError, defineSchema } from "letters-patent";
 

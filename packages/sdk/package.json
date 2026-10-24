@@ -1,10 +1,10 @@
 {
-  "name": "@letters-patent/kit",
+  "name": "@letters-patent/sdk",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/letters-patent.git",
-    "directory": "packages/kit"
+    "directory": "packages/sdk"
   },
   "type": "module",
   "main": "./.dist/index.mjs",

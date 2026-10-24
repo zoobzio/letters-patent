@@ -1,8 +1,8 @@
 import type { Contract } from "letters-patent";
-import type { State } from "letters-patent/kit";
+import type { State } from "letters-patent/sdk";
 import type { GoogleClaims, GoogleOptions, Session, Settings } from "./types";
 
-import { defineProvider } from "letters-patent/kit";
+import { defineProvider } from "letters-patent/sdk";
 import { getQuery, getRequestURL } from "h3";
 
 import {

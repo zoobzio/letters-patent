@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Meta, User } from "@letters-patent/schema";
 import { SchemaError, defineSchema } from "@letters-patent/schema";
-import type { Provider, State } from "@letters-patent/kit";
+import type { Provider, State } from "@letters-patent/sdk";
 import { definePatent } from "../src/index";
 
 const schema = defineSchema({

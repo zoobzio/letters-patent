@@ -4,7 +4,7 @@ export default defineBuildConfig({
   entries: [
     {
       type: "bundle",
-      input: ["./src/index.ts", "./src/kit.ts", "./src/config.ts"],
+      input: ["./src/index.ts", "./src/sdk.ts", "./src/config.ts"],
       outDir: ".dist",
     },
   ],

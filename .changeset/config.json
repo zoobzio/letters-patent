@@ -11,7 +11,7 @@
     [
       "letters-patent",
       "@letters-patent/core",
-      "@letters-patent/kit",
+      "@letters-patent/sdk",
       "@letters-patent/schema",
       "@letters-patent/nuxt",
       "@letters-patent/google"

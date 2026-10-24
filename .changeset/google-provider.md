@@ -1,5 +1,5 @@
 ---
-"@letters-patent/kit": patch
+"@letters-patent/sdk": patch
 "@letters-patent/nuxt": patch
 "@letters-patent/google": patch
 "letters-patent": patch
@@ -7,7 +7,7 @@
 
 Add the Google provider and the return leg redirect-based flows need.
 
-- `@letters-patent/kit`: a bridge may be asynchronous — `defineProvider`
+- `@letters-patent/sdk`: a bridge may be asynchronous — `defineProvider`
   awaits it before proving the result, so an app can look its user up in
   its own records at the boundary. `login` may return a `Redirect` to
   continue out-of-band, and the new optional `callback` completes the flow

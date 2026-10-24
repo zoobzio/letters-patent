@@ -102,36 +102,36 @@ importers:
 
   packages/core:
     dependencies:
-      '@letters-patent/kit':
-        specifier: workspace:*
-        version: link:../kit
       '@letters-patent/schema':
         specifier: workspace:*
         version: link:../schema
-
-  packages/kit:
-    dependencies:
-      '@letters-patent/schema':
+      '@letters-patent/sdk':
         specifier: workspace:*
-        version: link:../schema
-      objectively:
-        specifier: 'catalog:'
-        version: 0.1.1
+        version: link:../sdk
 
   packages/letters-patent:
     dependencies:
       '@letters-patent/core':
         specifier: workspace:*
         version: link:../core
-      '@letters-patent/kit':
-        specifier: workspace:*
-        version: link:../kit
       '@letters-patent/schema':
         specifier: workspace:*
         version: link:../schema
+      '@letters-patent/sdk':
+        specifier: workspace:*
+        version: link:../sdk
 
   packages/schema:
     dependencies:
+      objectively:
+        specifier: 'catalog:'
+        version: 0.1.1
+
+  packages/sdk:
+    dependencies:
+      '@letters-patent/schema':
+        specifier: workspace:*
+        version: link:../schema
       objectively:
         specifier: 'catalog:'
         version: 0.1.1

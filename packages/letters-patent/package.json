@@ -14,9 +14,9 @@
       "types": "./.dist/index.d.mts",
       "import": "./.dist/index.mjs"
     },
-    "./kit": {
-      "types": "./.dist/kit.d.mts",
-      "import": "./.dist/kit.mjs"
+    "./sdk": {
+      "types": "./.dist/sdk.d.mts",
+      "import": "./.dist/sdk.mjs"
     },
     "./config": {
       "types": "./.dist/config.d.mts",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@letters-patent/core": "workspace:*",
-    "@letters-patent/kit": "workspace:*",
+    "@letters-patent/sdk": "workspace:*",
     "@letters-patent/schema": "workspace:*"
   }
 }

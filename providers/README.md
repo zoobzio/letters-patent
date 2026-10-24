@@ -1,7 +1,7 @@
 # providers
 
 Published letters-patent providers: each wraps one authentication service as the
-`Provider<C>` callbacks from [`@letters-patent/kit`](../packages/kit), authored
+`Provider<C>` callbacks from [`@letters-patent/sdk`](../packages/sdk), authored
 with `defineProvider`. An app closes the contract with its bridge; the provider
 never sees one.
 

@@ -1,8 +1,8 @@
 import type { Patent, Events } from "./types";
 import type { Contract, Schema } from "@letters-patent/schema";
-import type { Provider, State } from "@letters-patent/kit";
+import type { Provider, State } from "@letters-patent/sdk";
 
-import { defineState } from "@letters-patent/kit";
+import { defineState } from "@letters-patent/sdk";
 
 /**
  * Builds the runtime {@link Patent} service over a schema and a provider.

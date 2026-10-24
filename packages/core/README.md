@@ -2,7 +2,7 @@
 
 The service runtime. `definePatent` takes a schema (the validation bundle
 derived from a contract by [`@letters-patent/schema`](../schema)) and a provider
-(the callbacks from [`@letters-patent/kit`](../kit)) and returns the service:
+(the callbacks from [`@letters-patent/sdk`](../sdk)) and returns the service:
 current user state behind the schema-guarded proxy, authorization checks
 against the contract's vocabulary, and a no-argument lifecycle that invokes
 the provider with letters-patent's own domain objects — the guarded state and the

@@ -1,8 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import type { Provider } from "../src/kit";
+import type { Provider } from "../src/sdk";
 import { definePatent, defineSchema } from "../src/index";
 import { defineLettersPatentConfig } from "../src/config";
-import { defineProvider, defineState } from "../src/kit";
+import { defineProvider, defineState } from "../src/sdk";
 
 describe("letters-patent", () => {
   it("exposes the consumer surface at the root", () => {
@@ -35,7 +35,7 @@ describe("letters-patent", () => {
     expectTypeOf(declared.meta.plan).toEqualTypeOf<readonly ["free", "pro"]>();
   });
 
-  it("exposes the provider surface at ./kit", () => {
+  it("exposes the provider surface at ./sdk", () => {
     expect(defineProvider).toBeTypeOf("function");
     expect(defineState).toBeTypeOf("function");
   });

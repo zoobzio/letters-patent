@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Meta, User } from "letters-patent";
-import type { Provider } from "letters-patent/kit";
+import type { Provider } from "letters-patent/sdk";
 import { definePatent, defineSchema } from "letters-patent";
 
 import { guard } from "../../src/runtime/guard";
